@@ -2,6 +2,9 @@
 
 const dropdownOptions = [
   {'label': '--Please choose an option--', 'value': ''},
+  {'label': 'Coastal Conditions', 'value': 'cc'},
+  {'label': 'Coastal Processes', 'value': 'cp'},
+  {'label': 'Combined Models', 'value': 'cm'},
   {'label': 'Sediment Net Loss', 'value': 'sl'},
   // {'label': 'Sediment Gain', 'value': 'sg'},
   {'label': 'Erosion Potential', 'value': 'ep'},
