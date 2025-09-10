@@ -68,54 +68,54 @@ const flagIcon = L.icon({
 });
 
 // map.js will cal this function for similarity finder
-function handleSimilarityCalculations(mid, map2, shorelineBase) {
+function handleSimilarityCalculations(mid, map, shorelineBase) {
   const coastLine = turf.lineString(shorelineBase.features[0].geometry.coordinates);
 
   startButtonSim.addEventListener('click', () => {
-    handleSimilarityMapSelection(map2, mid, coastLine);
+    handleSimilarityMapSelection(map, mid, coastLine);
   });
 }
 
 
 // function for similarity finder
-function handleSimilarityMapSelection(map2, mid, coastLine) {
+function handleSimilarityMapSelection(map, mid, coastLine) {
   // clear any existing features / reset
-  map2.flyToBounds(map2.zoomRefLayer.getBounds());
-  map2.markerLayer.clearLayers();
-  map2.pickPointLayer.clearLayers();
+  map.flyToBounds(map.zoomRefLayer.getBounds());
+  map.markerLayer.clearLayers();
+  map.pickPointLayer.clearLayers();
 
   // draggable markers part
-  const midMarker = initializePoints(map2, mid, flagIcon);
+  const midMarker = initializePoints(map, mid, flagIcon);
 
   midMarker.addEventListener('dragend', () => {
-    handleMarkerSnap(coastLine, midMarker, map2);
+    handleMarkerSnap(coastLine, midMarker, map);
   });
 
   // next button part after user selected a point
   // this button is set within the start button to make sure nothing will happen if people do not "start"
   finishButtonSim.addEventListener('click', () => {
     withSpinnerDo(() => {
-      const [midMarker] = map2.markerLayer.getLayers();
+      const [midMarker] = map.markerLayer.getLayers();
       // for some reasons there will be more than one marker if rerun this step, only the final one will be valid
       if (midMarker !== void 0) { // void 0 is the same as undefined
-        calResForSimilarity(midMarker.getLatLng(), coastLine, map2);
+        calResForSimilarity(midMarker.getLatLng(), coastLine, map);
       }
     });
   });
 }
 
 // handle marker point after user moved them
-function calResForSimilarity(newMid, coastLine, map2) {
+function calResForSimilarity(newMid, coastLine, map) {
   // zoom to the whole coastline
-  map2.fitBounds(map2.zoomRefLayer.getBounds());
+  map.fitBounds(map.zoomRefLayer.getBounds());
   // disable step 1 buttons
   startButtonSim.disabled = true;
   finishButtonSim.disabled = true;
 
   // map selected point on map
-  map2.markerLayer.clearLayers();
+  map.markerLayer.clearLayers();
   const midPointSelect = turf.point([newMid.lng, newMid.lat]);
-  map2.pickPointLayer.addData(midPointSelect);
+  map.pickPointLayer.addData(midPointSelect);
 
   // enable step 2 buttons
   generateResButtonSim.disabled = false;
@@ -139,25 +139,25 @@ function calResForSimilarity(newMid, coastLine, map2) {
   // handle return button
   returnStartButtonSim.addEventListener('click', () => {
     returnToSliderGroup();
-    returnToGenerateResSim(map2);
-    returnToStartSim(map2, coastLine);
+    returnToGenerateResSim(map);
+    returnToStartSim(map, coastLine);
   });
 
   // handle inputs from form
   generateResButtonSim.addEventListener('click', () => {
     withSpinnerDo(() => {
-      handleSimCalculations(midPointSelect, step2FormSim, firstDropSim, secondDropSim, thirdDropSim, map2, coastLine);
+      handleSimCalculations(midPointSelect, step2FormSim, firstDropSim, secondDropSim, thirdDropSim, map, coastLine);
     });
   });
 }
 
 // actual res calculations
-function handleSimCalculations(midPointSelect, step2Form, firstDrop, secondDrop, thirdDrop, map2, coastalLine) {
+function handleSimCalculations(midPointSelect, step2Form, firstDrop, secondDrop, thirdDrop, map, coastalLine) {
   // zoom to the whole coastline
-  map2.fitBounds(map2.zoomRefLayer.getBounds());
+  map.fitBounds(map.zoomRefLayer.getBounds());
 
-  if (map2.colorLayer !== null) {
-    map2.colorLayer.clearLayers();
+  if (map.colorLayer !== null) {
+    map.colorLayer.clearLayers();
   }
 
   // check all the boxes are filled
@@ -169,10 +169,10 @@ function handleSimCalculations(midPointSelect, step2Form, firstDrop, secondDrop,
   const resolutionCollection = getFtResolution(coastalLine, 5000); // feature collection of a lot of linestrings
   console.log(resolutionCollection);
 
-  const [firstProp, secondProp, thirdProp] = munipulateResCollection(map2, resolutionCollection, firstDrop, secondDrop, thirdDrop);
+  const [firstProp, secondProp, thirdProp] = munipulateResCollection(map, resolutionCollection, firstDrop, secondDrop, thirdDrop);
 
   // add the resolution data to map and color that based on the final score of each coastline piece
-  map2.colorLayer = L.geoJSON(resolutionCollection, {
+  map.colorLayer = L.geoJSON(resolutionCollection, {
     style: (sample) => {
       const colorValue = colorScale(sample.properties.finalValueNormal);
       return {
@@ -181,20 +181,20 @@ function handleSimCalculations(midPointSelect, step2Form, firstDrop, secondDrop,
         weight: 3,
       };
     },
-  }).addTo(map2);
+  }).addTo(map);
 
   // add legend for the resolution box
-  map2.legend.onAdd = (map2) => {
-    return legend1Style(map2, colorScale, 'legend-content-sim');
+  map.legend.onAdd = (map) => {
+    return legend1Style(map, colorScale, 'legend-content-sim');
   };
-  map2.legend.addTo(map2);
+  map.legend.addTo(map);
 
   // find final score for the selected point
   // findClosestData only takes polygon/line, not point, so need to buffer the point
   const bufferedPoint = turf.buffer(midPointSelect, 0.1);
   const pointScore = findClosestData(resolutionCollection, bufferedPoint);
 
-  map2.pickPointLayer.bringToFront()
+  map.pickPointLayer.bringToFront()
     .bindTooltip((l) => { // final unit box tooltip options
       return `<p class="unit-tooltip"><strong>Final score: </strong>${pointScore[0].properties.finalValueNormal.toFixed(2)}</p>`;
     }).bindPopup((l) => { // final unit box popup options
@@ -203,12 +203,12 @@ function handleSimCalculations(midPointSelect, step2Form, firstDrop, secondDrop,
 
   // process to the following step if user click next
   finishResButtonSim.addEventListener('click', () => {
-    simGroupRes(map2, resolutionCollection, firstProp, secondProp, thirdProp, pointScore);
+    simGroupRes(map, resolutionCollection, firstProp, secondProp, thirdProp, pointScore);
   });
 }
 
 // prepare for filtering
-function simGroupRes(map2, resolutionCollection, firstProp, secondProp, thirdProp, pointScore) {
+function simGroupRes(map, resolutionCollection, firstProp, secondProp, thirdProp, pointScore) {
   // enable step 3 box
   fromSliderSim.disabled = false;
   toSliderSim.disabled = false;
@@ -230,22 +230,22 @@ function simGroupRes(map2, resolutionCollection, firstProp, secondProp, thirdPro
   // handle return to priority step
   returnGenerateResButtonSim.addEventListener('click', () => {
     returnToSliderGroup();
-    returnToGenerateResSim(map2);
+    returnToGenerateResSim(map);
   });
 
   // handle range input
   generateGroupButtonSim.addEventListener('click', () => {
-    handleGroupResSim(map2, resolutionCollection, firstProp, secondProp, thirdProp, pointScore);
+    handleGroupResSim(map, resolutionCollection, firstProp, secondProp, thirdProp, pointScore);
   });
 }
 
 // filter by range
-function handleGroupResSim(map2, resolutionCollection, firstProp, secondProp, thirdProp, pointScore) {
+function handleGroupResSim(map, resolutionCollection, firstProp, secondProp, thirdProp, pointScore) {
   // zoom to the whole coastline
-  map2.fitBounds(map2.zoomRefLayer.getBounds());
+  map.fitBounds(map.zoomRefLayer.getBounds());
   // clear any existing features / reset
-  if (map2.finalSimLayer !== null) {
-    map2.finalSimLayer.clearLayers();
+  if (map.finalSimLayer !== null) {
+    map.finalSimLayer.clearLayers();
   }
 
   // For some reasons, the selected point's score is not updated in a timely manner, so here get the score from the label on the slider.
@@ -268,13 +268,13 @@ function handleGroupResSim(map2, resolutionCollection, firstProp, secondProp, th
   console.log(simGeojson);
 
   // add unit legend
-  legend3Style(map2, reversedUnitColorScale, minSim, maxSim);
+  legend3Style(map, reversedUnitColorScale, minSim, maxSim);
 
   // add the res in the selected range to map and color that based on the normal final score of each coastline piece
   // adjust pop up based on number of selected priorities
   const firstPropName = modelName[firstDropSim.value];
   if (secondDropSim.value == 'ns') {
-    map2.finalSimLayer = L.geoJSON(simGeojson, rangeColorStyle).bindTooltip((l) => { // final unit box tooltip options
+    map.finalSimLayer = L.geoJSON(simGeojson, rangeColorStyle).bindTooltip((l) => { // final unit box tooltip options
       return `<p class="unit-tooltip"><strong>Difference:</strong> ${(l.feature.properties.similarity).toFixed(2)}</p>`;
     }).bindPopup((l) => { // final unit box popup options
       return `<h3 class="unit-pop-title">ID: ${l.feature.properties.ID + 1}</h3>
@@ -282,12 +282,12 @@ function handleGroupResSim(map2, resolutionCollection, firstProp, secondProp, th
               <p class="unit-finalscore"><strong>Final Score:</strong> ${l.feature.properties.finalValueNormal.toFixed(2)}</p>
               <p class="unit-first-priority"><strong>${firstPropName}:</strong> ${l.feature.properties[firstProp].toFixed(2)}</p>
       `;
-    }).addTo(map2);
-    map2.colorLayer.bringToFront();
-    map2.pickPointLayer.bringToFront();
+    }).addTo(map);
+    map.colorLayer.bringToFront();
+    map.pickPointLayer.bringToFront();
   } else if (thirdDropSim.value == 'ns') {
     const secondPropName = modelName[secondDropSim.value];
-    map2.finalSimLayer = L.geoJSON(simGeojson, rangeColorStyle).bindTooltip((l) => { // final unit box tooltip options
+    map.finalSimLayer = L.geoJSON(simGeojson, rangeColorStyle).bindTooltip((l) => { // final unit box tooltip options
       return `<p class="unit-tooltip"><strong>Difference:</strong> ${(l.feature.properties.similarity).toFixed(2)}</p>`;
     }).bindPopup((l) => { // final unit box popup options
       return `<h3 class="unit-pop-title">ID: ${l.feature.properties.ID + 1}</h3>
@@ -296,13 +296,13 @@ function handleGroupResSim(map2, resolutionCollection, firstProp, secondProp, th
               <p class="unit-first-priority"><strong>${firstPropName}:</strong> ${l.feature.properties[firstProp].toFixed(2)}</p>
               <p class="unit-second-priority"><strong>${secondPropName}:</strong> ${l.feature.properties[secondProp].toFixed(2)}</p>
       `;
-    }).addTo(map2);
-    map2.colorLayer.bringToFront();
-    map2.pickPointLayer.bringToFront();
+    }).addTo(map);
+    map.colorLayer.bringToFront();
+    map.pickPointLayer.bringToFront();
   } else {
     const secondPropName = modelName[secondDropSim.value];
     const thirdPropName = modelName[thirdDropSim.value];
-    map2.finalSimLayer = L.geoJSON(simGeojson, rangeColorStyle).bindTooltip((l) => { // final unit box tooltip options
+    map.finalSimLayer = L.geoJSON(simGeojson, rangeColorStyle).bindTooltip((l) => { // final unit box tooltip options
       return `<p class="unit-tooltip"><strong>Difference:</strong> ${(l.feature.properties.similarity).toFixed(2)}</p>`;
     }).bindPopup((l) => { // final unit box popup options
       return `<h3 class="unit-pop-title">ID: ${l.feature.properties.ID + 1}</h3>
@@ -312,9 +312,9 @@ function handleGroupResSim(map2, resolutionCollection, firstProp, secondProp, th
               <p class="unit-second-priority"><strong>${secondPropName}:</strong> ${l.feature.properties[secondProp].toFixed(2)}</p>
               <p class="unit-second-priority"><strong>${thirdPropName}:</strong> ${l.feature.properties[thirdProp].toFixed(2)}</p>
       `;
-    }).addTo(map2);
-    map2.colorLayer.bringToFront();
-    map2.pickPointLayer.bringToFront();
+    }).addTo(map);
+    map.colorLayer.bringToFront();
+    map.pickPointLayer.bringToFront();
   }
 
   // finish unit step and go to next step
@@ -385,7 +385,7 @@ function returnToSliderGroup() {
   toInputSim.disabled = false;
 }
 
-function returnToGenerateResSim(map2) {
+function returnToGenerateResSim(map) {
   // enable dropdown boxes
   generateResButtonSim.disabled = false;
   finishResButtonSim.disabled = false;
@@ -402,9 +402,9 @@ function returnToGenerateResSim(map2) {
   generateGroupButtonSim.disabled = true;
   finishGroupButtonSim .disabled = true;
   // map cleanup
-  map2.fitBounds(map2.zoomRefLayer.getBounds());
-  if (map2.finalSimLayer !== null) {
-    map2.finalSimLayer.clearLayers();
+  map.fitBounds(map.zoomRefLayer.getBounds());
+  if (map.finalSimLayer !== null) {
+    map.finalSimLayer.clearLayers();
   }
   // remove similarity area legend
   const legendContent = document.querySelector('.legend-content-sim');
@@ -420,7 +420,7 @@ function returnToGenerateResSim(map2) {
   scoreLabel.classList.add('hidden');
 }
 
-function returnToStartSim(map2, coastLine) {
+function returnToStartSim(map, coastLine) {
   // enable step 1 buttons
   startButtonSim.disabled = false;
   finishButtonSim.disabled = false;
@@ -435,20 +435,20 @@ function returnToStartSim(map2, coastLine) {
     i.disabled = true;
   }
   // map cleanup
-  map2.fitBounds(map2.zoomRefLayer.getBounds());
-  const currentPoint = map2.pickPointLayer.toGeoJSON();
+  map.fitBounds(map.zoomRefLayer.getBounds());
+  const currentPoint = map.pickPointLayer.toGeoJSON();
   console.log(currentPoint);
-  map2.pickPointLayer.clearLayers();
-  if (map2.colorLayer !== null) {
-    map2.colorLayer.clearLayers();
+  map.pickPointLayer.clearLayers();
+  if (map.colorLayer !== null) {
+    map.colorLayer.clearLayers();
   }
   // change the selected point back to marker pin
   // need to read point location from pickPointLayer
-  const updatedMarker = initializePoints(map2, currentPoint.features[0].geometry.coordinates);
+  const updatedMarker = initializePoints(map, currentPoint.features[0].geometry.coordinates, flagIcon);
   updatedMarker.addEventListener('dragend', () => {
-    handleMarkerSnap(coastLine, updatedMarker, map2);
+    handleMarkerSnap(coastLine, updatedMarker, map);
   });
-  map2.legend.remove();
+  map.legend.remove();
 }
 
 export {

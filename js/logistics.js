@@ -2,8 +2,8 @@
 
 const dropdownOptions = [
   {'label': '--Please choose an option--', 'value': ''},
-  {'label': 'Sediment Loss', 'value': 'sl'},
-  {'label': 'Sediment Gain', 'value': 'sg'},
+  {'label': 'Sediment Net Loss', 'value': 'sl'},
+  // {'label': 'Sediment Gain', 'value': 'sg'},
   {'label': 'Erosion Potential', 'value': 'ep'},
   {'label': 'Invasive Species Control', 'value': 'is'},
   {'label': 'Habitat Protection', 'value': 'hp'},

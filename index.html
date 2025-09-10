@@ -262,7 +262,7 @@
 
                 </div>
 
-                <div id="map2"></div>
+                <div id="map"></div>
             </div>
             
 
@@ -632,14 +632,7 @@
                 <div class="toc">
                     <ul class="section table-of-contents">
                         <li><a href="#documentation" onclick="smoothScroll('documentation')"><em>Go to top</em></a></li>
-                        <li>
-                            <a href="#unit-generator-explanation" onclick="smoothScroll('unit-generator-explanation')">Unit Generator Explanation</a>
-                            <ul class="table-of-contents">
-                                <li><a href="#purpose-goal" onclick="smoothScroll('purpose-goal')">Purpose and Goal</a></li>
-                                <li><a href="#steps-explanation" onclick="smoothScroll('steps-explanation')">Steps Explanation</a></li>
-                            </ul>
-                        </li>
-
+                    
                         <li>
                             <a href="#similarity-finder-explanation" onclick="smoothScroll('similarity-finder-explanation')">Similarity Finder Explanation</a>
                             <ul class="table-of-contents">
@@ -667,160 +660,11 @@
                 <div class="doc">
                     
                     <h1 id="documentation" class="section scrollspy">Documentation</h1>
-
-                    <h2 id="unit-generator-explanation" class="section scrollspy">Unit Generator Explanation</h2>
-
-                    <h3 id="purpose-goal" class="section scrollspy">Purpose and Goal</h3>
-                    <p class="p-dock">Operational coastal units are seen as a relatively untested and novel approach to coastal analysis that could hold particular potential in decision-making processes that require considering both local conditions and regional transferability. At its most simplistic, the operational coastal unit method assumes that there is value in defining new boundaries for where particular strategies are or are not applicable based on the contextual conditions found in specific places. And perhaps most importantly, that these new boundaries need not respond to existing administrative jurisdictions. Underpinning this idea are two overarching goals, balanced with one another.</p>
-                    <ol>
-                        <li><p>That local conditions and context are important culturally and ecologically. Decision-making regarding the shoreline should take into consideration the cultural values and knowledge that exist and have evolved in those specific areas. Additionally, the ecological context of any given location should be considered as important and special as opposed to generalized into a larger and more abstract idea of 'ecology'. In these ways, local conditions can be both acknowledged and formative in the decision-making processes to encourage the development of more sensitive and contextual outcomes. Put simply, the more local, the better.</p></li>
-                        <li><p>That transferability is to some degree essential to the practicality of any formal coastal management decision. This does not mean that transferability is what is desired, but only that it is what is necessary to get projects funded and completed. In this way, projects should aim to be as contextually specific as possible while only being as transferable as necessary. However, in the correct circumstances, transferability could provide the opportunity for ideas to spread within areas of similar contextual conditions which does offer both cost savings and project innovation.</p></li>
-                    </ol>
-                    <p class="p-dock">With these two balanced goals in mind, this project aims to establish a method for creating coastal units that are particular and appropriate for a given task. This specific project asks to look at the application of the operational coastal units in coastal management decisions that involve strategic sediment management and adaptability as a defining feature, although many other objectives could also be met with the coastal unit methods and efforts have been made to develop a more robust unit structure to accommodate some of these alternative objectives.</p>
-
-                    <h3 id="steps-explanation" class="section scrollspy">Steps Explanation</h3>
-    
-                    <h4 id="general" class="section scrollspy">General</h4>
-                    <ul>
-                        <li>
-                            <h5>How to use the buttons in each step:</h5> At the initial state, all the input boxes and buttons are locked except the <code>Start/Reset</code> button in step one. To start generating the units, click the <code>Start/Reset</code> button. For all the other buttons, they should be clicked in sequence. That is to say, after finishing choosing or typing the inputs, click the <code>(Re)Generate</code> button to preview the result, and if the result looks good, click the <code>Next</code> button in each step to unlock the input boxes and buttons in the following step. If you want to go back to a previous step, click the <code>Return to this step</code> button in the step which you want to go back to.
-                        </li>
-                        <li>
-                            <h5>Vocabulary:</h5>
-                            <ul>
-                                <li>
-                                    <em><p>Resolution:</p></em>
-                                    <P>Continuous small pieces with the same length. It is the product of dividing a longer line. This is the overall fidelity or detail of the unit generation process along the length of the selected study area. It is effectively the “cell size” that the selected area is split into before attributes are applied to them and they are then re-assembled into units. For example: If 50 meters is selected as the resolution, the selected study area will be split into 50-meter segments along its length and attributes of the following steps applied to those 50-meter segments.</P>
-                                </li>
-                                <li>
-                                    <em><p>Priority:</p></em>
-                                    <P>List of criteria that will be used to weight the calculations. These are the topics of interest to the user that assemble different data sets together to be applied to the cells created in the previous step. For example: If “Erosion Potential” and “NFWF Habitat Protection” are selected, datasets will be assembled to create operational coastal units that prioritize coastal erosion first and habitat creation second. The outcome of this process is the application of a rating for each segment from 0-1, based on how it applies to the selected priorities. More details on what datasets are used for what priority are included below.</P>
-                                </li>
-                                <li>
-                                    <em><p>Group:</p></em>
-                                    <P>The number of group types. A group means a group of resolution that has similar score from calculations. Multiple units may be in the same group. This indicates how many groups the user would like the prioritized cells to be assembled into. For example, in Figure 5 below, the user selected 3 groups, making values of 1-3 in the red group, 4-6 in the yellow group, and 7-10 in the blue group. As the example illustrates, 3 groups do not equal 3 units, (the example has 6 units) as the unit number will vary based on the distribution of priority ratings.</P>
-                                </li>
-                                <li>
-                                    <em><p>Unit:</p></em>
-                                    <P>Final product of this tool with a unique ID.</P>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <h5>Summary of the working method for operational coastal unit delineation</h5>
-                            <section class="insert-table">
-                                <div class="insert-table-group-sum">
-                                    <p class="insert-table-text-sum"><strong>Figure 1. Divide:</strong> Coast divided into "cells" of set size, e.g. 10 meters.</p>
-                                    <img src="./img/documentation/sum-1.jpg" class="insert-table-img-sum">
-                                </div>
-                                <div class="insert-table-group-sum">
-                                    <p class="insert-table-text-sum"><strong>Figure 2. Match:</strong> Datasets are also divided and matched to cells.</p>
-                                    <img src="./img/documentation/sum-2.jpg" class="insert-table-img-sum">
-                                </div>
-                                <div class="insert-table-group-sum">
-                                    <p class="insert-table-text-sum"><strong>Figure 3. Class:</strong> Data in each cell is classed based on user priority.</p>
-                                    <img src="./img/documentation/sum-3.jpg" class="insert-table-img-sum">
-                                </div>
-                                <div class="insert-table-group-sum">
-                                    <p class="insert-table-text-sum"><strong>Figure 4. Score:</strong> Scores are assigned to each cell based on classification.</p>
-                                    <img src="./img/documentation/sum-4.jpg" class="insert-table-img-sum">
-                                </div>
-                                <div class="insert-table-group-sum">
-                                    <p class="insert-table-text-sum"><strong>Figure 5. Group:</strong> Cells are grouped into coastal units based on scores and desired group number.</p>
-                                    <img src="./img/documentation/sum-5.jpg" class="insert-table-img-sum">
-                                </div>
-                            </section>
-                        </li>
-                    </ul>
-    
-                    <h4 id="step-by-step" class="section scrollspy">Step by Step Instructions</h4>
-    
-                    <h4 id="divide-step1" class="section scrollspy">Step 1: Choose your area</h4>
-                    <ul>
-                        <li><h5>Purpose:</h5> This step will help choose your area of interest along the Lake Erie shoreline of New York State, which will be the base of the calculations in the following steps and the area that will eventually be divided into units.</li>
-                        <li>
-                            <h5>Method:</h5> 
-                            <ol>
-                                <li>Click the <code>Start/Reset</code> button to start. After clicking it, you will see two pins appear at the two ends of the coastal line.</li>
-                                <li>Drag the two pins to the two ends of the area of interest along the coastline. The pins will automatically snap to the location of the coastline. You can drag and redrag for multiple times until you are satisfied with the result.</li> 
-                                <li>After you drag the pins to the desired location, click the <code>Next</code> button to move to step 2, which will zoom the map to your selected location and unlock the input boxes in step 2.</li>
-                            </ol>
-                        </li>
-                        <li><h5>Input Description:</h5> There are no input boxes in this step: interact with the map to choose your area.</li>
-                        <li><h5>Important:</h5> Remember to click the <code>Start/Reset</code> button to initialize this tool and click the <code>Next</code> button to move to step 2.</li>
-                    </ul>
-    
-                    <h4 id="divide-step2" class="section scrollspy">Step 2: Choose resolution</h4>
-                    <ul>
-                        <li><h5>Purpose:</h5> This step will divide the coastline you choose in step 1 to multiple small pieces with the same length, which is called <code>Resolution</code>.<li>
-                            <h5>Method:</h5> 
-                            <ol>
-                                <li>In the input box below the <code>Resolution</code>, type the length (as numbers) you want to have for each resolution. You can choose the unit (e.g. feet, meter) in the dropdown box next to the input box.</li>
-                            </ol>
-                        </li>
-                        <li>
-                            <h5>Input Description:</h5>
-                            <ul>
-                                <li><code>Resolutipn</code>: The length that will be used to divide the coastline. For example, if you type "30" and choose "feet" as the unit type, the coastline chunk you selected in the previous step will be separated into small line segments that are 30 feet each. </li>
-                            </ul>
-                        </li>
-                    </ul>
-
-                    <h4 id="divide-step2" class="section scrollspy">Step 3: Choose priority</h4>
-                    <ul>
-                        <li><h5>Purpose:</h5> This step will do the scoring for each resolution based on the criteria you choose in the <code>Priority</code> dropdown box and color each resolution by its final score.</li>
-                        <li>
-                            <h5>Method:</h5> 
-                            <ol>
-                                <li>Pick the scoring criteria that you are interested in. In the dropdown box next to <code>First</code>, select the criterion that you care the most. The score for each resolution will be weighted based on the priority list you choose.</li>
-                                <li>After you fill in all the input boxes, click the <code>(Re)Generate</code> button to preview the result, which will display the score for each resolution in a color gradient. You can click the <code>(Re)Generate</code> for multiple times to change inputs (you can also change the resolution in step 2 at this point).</li>
-                                <li>After you are satisfied with the preview result, click the <code>Next</code> button to move to step 4, which will unlock the input boxes in step 4.</li>
-                            </ol>
-                        </li>
-                        <li>
-                            <h5>Input Description:</h5>
-                            <ul>
-                                <li><code>Priority</code>: In this part, you will specify the criteria you want to use to determine the final units of your selected coastline. The score calculation for each criterion behind the scenes is linked to a certain calculation of GIS layers related to that criteria, called the "criteria model". See the "Criteria Models Explanation" below for details about each calculation.</li>
-                            </ul>
-                        </li>
-                        <li><h5>Important:</h5> Remember to click the <code>Next</code> button to move to step 4.</li>
-
-                        <li><h5>Note:</h5> Because of the limitation of the original GIS layers, some GIS layers may not cover the whole coastline of Lake Erie. In that case, the final result of this tool may not be precise. See the "Criteria Models Explanation" below for details.</li>
-                    </ul>
-    
-                    <h4 id="divide-step3" class="section scrollspy">Step 4: Group into Final Units</h4>
-                    <ul>
-                        <li><h5>Purpose:</h5> This step will group the resolution with similar scores from step 3 into different <code>groups</code> and display the final units through a box around each unit.</li>
-                        <li>
-                            <h5>Method:</h5> 
-                            <ol>
-                                <li>In the input box below the <code>Number of groups</code>, type the number of groups (as numbers) you want to have for the final result. Multiple final units may be in the same group. The group stands for the number of group types that you want to have for the final result. </li>
-                                <li>Next, click the <code>(Re)Generate</code> button to preview the result, which will display the final units generated from the number of groups you specified above by circling them in boxes. When hover over each box, a pop-up will show the group type of that unit, and when you click each box, a panel will display more detailed information about each unit. You can click the <code>(Re)Generate</code> for multiple times.</li>
-                                <li>After you are satisfied with the preview result, click the <code>Next</code> button to move to step 5, which will unlock the input boxes in step 5.</li>
-                            </ol>
-                        </li>
-                        <li><h5>Input Description:</h5><code>Number of groups</code>: The number of unit types you want to have for the final units based on the score of the resolution. Resolutions with similar final scores will be grouped together to form the final unit. Each group may belong to multiple units. It is also possible that one or multiple group types are not connected to any units.</li>
-                        <li><h5>Important:</h5> Remember to click the <code>Next</code> button to move to step 5.</li>
-                    </ul>
-
-                    <h4 id="divide-step4" class="section scrollspy">Step 5: Download</h4>
-                    <ul>
-                        <li><h5>Purpose:</h5> This step will let you download your result generated from the previous steps and use it elsewhere.</li>
-                        <li>
-                            <h5>Method:</h5> 
-                            <ol>
-                                <li>In the input box below the <code>Download Units</code>, choose the type of file that you want to generate. Currently, this step accepts geoJSON and shapefile.</li>
-                                <li>Next, click the <code>Download</code> button and a pop-up window will allow you the select the saving location.</li>
-                            </ol>
-                        </li>
-                    </ul>
-
-                    <hr>
                     
                     <h2 id="similarity-finder-explanation" class="section scrollspy">Similarity Finder Explanation</h2>
 
                     <h3 id="sf-purpose-goal" class="section scrollspy">Purpose and Goal</h3>
-                    <p class="p-dock">This component functions as a supplementary tool for the unit generator, enhancing its capabilities and broadening its application. Instead of selecting an area of interest and receiving a collection of units based on their priorities, this new tool allows users to identify similar areas along the entire coastline based on their priorities on a point of interest. By analyzing various geographical and environmental parameters, the tool can highlight regions with comparable characteristics.</p>
+                    <p class="p-dock">This tool allows users to identify similar areas along the entire coastline based on their priorities on a point of interest. By analyzing various geographical and environmental parameters, the tool can highlight regions with comparable characteristics.</p>
                     
                     <p class="p-dock">This project aims to leverage the calculation algorithms embedded within the unit generator to assist users in identifying areas with similar conditions. Coastal management professionals can use the results from this tool to draw parallels between different regions, enabling them to apply successful strategies from one area to another with similar conditions. This not only improves the efficiency of coastal management efforts but also helps in the sustainable development and preservation of coastal regions. </p>
 
@@ -1219,7 +1063,7 @@
                             </div>
                             <div class="contact-wrapper">
                                 <a href="https://emlabupenn.com/" target="_blank"><img class="logo" src="./img/logos/EMLab-LOGO.png" alt="Environmental Modeling Lab Logo"></a>
-                                <p class="foot-text">© 2024 Environmental Modeling Lab</p>
+                                <p class="foot-text">© 2025 Environmental Modeling Lab</p>
                             </div>
                             <div class="contact-wrapper">
                                 <strong><p>Office of the Director</p></strong>
@@ -1273,7 +1117,7 @@
 
         <footer class="footer">
             <p id="footnote">
-                <strong>University of Pennsylvania</strong> <a href="https://emlabupenn.com/" target="_blank"><strong>EMLab</strong></a> Last update: May 2025.
+                <strong>University of Pennsylvania</strong> <a href="https://emlabupenn.com/" target="_blank"><strong>EMLab</strong></a> Last update: September 2025.
             </p>
         </footer>
 

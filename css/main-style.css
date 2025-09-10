@@ -240,7 +240,7 @@ main {
     margin-bottom: 20px;
 }
 
-#map1, #map2 {
+#map {
     width: 100%;
     box-sizing: border-box;
 }
