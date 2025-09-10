@@ -1,10 +1,6 @@
-import { initializeSimilarAreaMap } from './map.js';
-import { censusTracts, dataBoundary, huc10, huc12, shorelineBase, county, sendimentBudget } from './main.js';
-
 // handle menu bar dynamics
 
 // get all the buttons
-const unitGeneratorButton = document.querySelector('.unit-generator-button');
 const similarAreaButton = document.querySelector('.find-similar-area');
 const dataExplorerButton = document.querySelector('.data-explorer');
 const documentationButton = document.querySelector('.documentation');
@@ -13,7 +9,6 @@ const menuBlock = document.querySelector('.menu-block');
 
 
 // get all divs
-const unitGeneratorDiv = document.querySelector('#unit-generator-body');
 const similarAreaDiv = document.querySelector('#find-similar-area-body');
 const dataExplorerDiv = document.querySelector('#data-explorer-body');
 const documentationDiv = document.querySelector('#documentation-body');
@@ -22,9 +17,7 @@ const documentationDiv = document.querySelector('#documentation-body');
 const footer = document.querySelector('.footer');
 
 
-const menuAll = [unitGeneratorDiv, similarAreaDiv, dataExplorerDiv, documentationDiv];
-
-let hasNotClickedSimilarAreaButton = true;
+const menuAll = [similarAreaDiv, dataExplorerDiv, documentationDiv];
 
 // create a function to handle menu bar situation
 
@@ -35,7 +28,7 @@ function handleMenuDisplay(select) {
     }
   }
   // different div has different display method
-  select == unitGeneratorDiv || select == similarAreaDiv ? select.style.display = 'flex' : select.style.display = 'block';
+  select == similarAreaDiv ? select.style.display = 'flex' : select.style.display = 'block';
 }
 
 function handleFooter(select) {
@@ -49,26 +42,16 @@ function manipulateMenu(select, width) {
 }
 
 function handleMenuBar() {
-  unitGeneratorButton.addEventListener('click', () => {
-    manipulateMenu(unitGeneratorDiv, 0);
-  });
-
   similarAreaButton.addEventListener('click', () => {
-    manipulateMenu(similarAreaDiv, '130px');
-    // initialize map here when display is not none, map cannot show up correctly if it is initially hidden
-    // only need to initialize the map once
-    if (hasNotClickedSimilarAreaButton) {
-      window.map2 = initializeSimilarAreaMap(censusTracts, dataBoundary, huc10, huc12, shorelineBase, county, sendimentBudget);
-      hasNotClickedSimilarAreaButton = false;
-    }
+    manipulateMenu(similarAreaDiv, 0);
   });
 
   dataExplorerButton.addEventListener('click', () => {
-    manipulateMenu(dataExplorerDiv, '260px');
+    manipulateMenu(dataExplorerDiv, '130px');
   });
 
   documentationButton.addEventListener('click', () => {
-    manipulateMenu(documentationDiv, '390px');
+    manipulateMenu(documentationDiv, '260px');
   });
 }
 

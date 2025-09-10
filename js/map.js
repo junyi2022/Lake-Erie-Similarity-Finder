@@ -1,6 +1,5 @@
 /* globals turf */
 
-import { handleAllCalculations } from './cal.js';
 import { handleSimilarityCalculations } from './cal-similarity.js';
 
 // prepare data for maps
@@ -98,101 +97,101 @@ const pickPointStyle = {
   radius: 10,
 };
 
-function initializeMap(censusTracts, dataBoundary, huc10, huc12, shorelineBase, county, sendimentBudget) {
-  const map = L.map('map1', {zoomSnap: 0, layers: [mapBoxTile]}).setView([42.57, -79.22], 10); // zoomSnap 0 make the zoom level to real number
+// function initializeMap(censusTracts, dataBoundary, huc10, huc12, shorelineBase, county, sendimentBudget) {
+//   const map = L.map('map1', {zoomSnap: 0, layers: [mapBoxTile]}).setView([42.57, -79.22], 10); // zoomSnap 0 make the zoom level to real number
 
-  const baseMaps = {
-    'Simple': mapBoxTile,
-    'Satellite': esriWorldImagery,
-  };
+//   const baseMaps = {
+//     'Simple': mapBoxTile,
+//     'Satellite': esriWorldImagery,
+//   };
 
-  // add layers
-  // if have a lot of layers, it is better to add layers as map's attributes
-  map.dataBoundaryLayer = L.geoJSON(dataBoundary, boundaryStyle);
-  map.dataBoundaryLayer.addTo(map);
+//   // add layers
+//   // if have a lot of layers, it is better to add layers as map's attributes
+//   map.dataBoundaryLayer = L.geoJSON(dataBoundary, boundaryStyle);
+//   map.dataBoundaryLayer.addTo(map);
 
-  map.censusTractLayer = L.geoJSON(censusTracts, censusTractStyle);
+//   map.censusTractLayer = L.geoJSON(censusTracts, censusTractStyle);
 
-  map.countyLayer = L.geoJSON(county, countyStyle);
+//   map.countyLayer = L.geoJSON(county, countyStyle);
 
-  map.huc10Layer = L.geoJSON(huc10, huc10Style);
+//   map.huc10Layer = L.geoJSON(huc10, huc10Style);
 
-  map.huc12Layer = L.geoJSON(huc12, huc12Style);
+//   map.huc12Layer = L.geoJSON(huc12, huc12Style);
 
-  map.sedimentBudgetLayer = L.geoJSON(sendimentBudget, sendimentBudgetStyle);
+//   map.sedimentBudgetLayer = L.geoJSON(sendimentBudget, sendimentBudgetStyle);
 
-  // coastline scope
+//   // coastline scope
 
-  map.shorelineBaseLayer = L.geoJSON(shorelineBase,
-    shorelineBaseStyle).bringToFront();
-  map.shorelineBaseLayer.addTo(map);
+//   map.shorelineBaseLayer = L.geoJSON(shorelineBase,
+//     shorelineBaseStyle).bringToFront();
+//   map.shorelineBaseLayer.addTo(map);
 
-  map.sliceLayer = L.geoJSON(null, sliceStyle);
-  map.sliceLayer.addTo(map);
+//   map.sliceLayer = L.geoJSON(null, sliceStyle);
+//   map.sliceLayer.addTo(map);
 
-  map.colorLayer = null;
-  map.finalUnitLayer = null;
+//   map.colorLayer = null;
+//   map.finalUnitLayer = null;
 
-  // initialize legend
-  map.legend = L.control({position: 'bottomright'});
+//   // initialize legend
+//   map.legend = L.control({position: 'bottomright'});
 
-  // add back button
-  const backView = L.control({position: 'topleft'});
-  backView.onAdd = (map) => {
-    return backButtonStyle(map);
-  };
-  backView.addTo(map);
+//   // add back button
+//   const backView = L.control({position: 'topleft'});
+//   backView.onAdd = (map) => {
+//     return backButtonStyle(map);
+//   };
+//   backView.addTo(map);
 
-  // layer control
-  map.countyLayer.addTo(map); // need to add it to map in order to have this layer show up when initialize
+//   // layer control
+//   map.countyLayer.addTo(map); // need to add it to map in order to have this layer show up when initialize
 
-  const layerControl = {
-    'Census Tract': map.censusTractLayer,
-    'County': map.countyLayer,
-    'HUC 10': map.huc10Layer,
-    'HUC12': map.huc12Layer,
-    'Sediment Budget': map.sedimentBudgetLayer,
-  };
+//   const layerControl = {
+//     'Census Tract': map.censusTractLayer,
+//     'County': map.countyLayer,
+//     'HUC 10': map.huc10Layer,
+//     'HUC12': map.huc12Layer,
+//     'Sediment Budget': map.sedimentBudgetLayer,
+//   };
 
-  // if only have one tile layer
-  // L.control.layers(null, layerControl).addTo(map);
+//   // if only have one tile layer
+//   // L.control.layers(null, layerControl).addTo(map);
 
-  // multiple tile layer
-  L.control.layers(baseMaps, layerControl).addTo(map);
+//   // multiple tile layer
+//   L.control.layers(baseMaps, layerControl).addTo(map);
 
-  // add scale bar
-  L.control.scale().addTo(map);
+//   // add scale bar
+//   L.control.scale().addTo(map);
 
-  // make the zoom level fit different browser size
-  // always focus on the buffer zone when initialize the map
-  const zoomRef = turf.buffer(dataBoundary, 20);
-  map.zoomRefLayer = L.geoJSON(zoomRef);
-  map.fitBounds(map.zoomRefLayer.getBounds());
+//   // make the zoom level fit different browser size
+//   // always focus on the buffer zone when initialize the map
+//   const zoomRef = turf.buffer(dataBoundary, 20);
+//   map.zoomRefLayer = L.geoJSON(zoomRef);
+//   map.fitBounds(map.zoomRefLayer.getBounds());
 
-  // always put coastal layer on the top when adding new layers to the map
-  map.addEventListener('overlayadd', () => {
-    map.shorelineBaseLayer.bringToFront();
-    map.sliceLayer.bringToFront();
-    if (map.colorLayer !== null) {
-      map.colorLayer.bringToFront();
-    }
-    map.dataBoundaryLayer.bringToFront();
-  });
+//   // always put coastal layer on the top when adding new layers to the map
+//   map.addEventListener('overlayadd', () => {
+//     map.shorelineBaseLayer.bringToFront();
+//     map.sliceLayer.bringToFront();
+//     if (map.colorLayer !== null) {
+//       map.colorLayer.bringToFront();
+//     }
+//     map.dataBoundaryLayer.bringToFront();
+//   });
 
-  // read the original start and end points
-  const shorePoints = shorelineBase.features[0].geometry.coordinates;
-  const start = shorePoints[0];
-  const end = shorePoints[shorePoints.length - 1]; // JS cannot select -1
+//   // read the original start and end points
+//   const shorePoints = shorelineBase.features[0].geometry.coordinates;
+//   const start = shorePoints[0];
+//   const end = shorePoints[shorePoints.length - 1]; // JS cannot select -1
 
-  // add a layer for markers
-  map.markerLayer = L.layerGroup();
-  map.markerLayer.addTo(map);
+//   // add a layer for markers
+//   map.markerLayer = L.layerGroup();
+//   map.markerLayer.addTo(map);
 
-  // call the calculation part
-  handleAllCalculations(start, end, map, shorelineBase);
+//   // call the calculation part
+//   handleAllCalculations(start, end, map, shorelineBase);
 
-  return map;
-}
+//   return map;
+// }
 
 
 function initializeSimilarAreaMap(censusTracts, dataBoundary, huc10, huc12, shorelineBase, county, sendimentBudget) {
@@ -320,39 +319,39 @@ function legend1Style(map, colorScale, divname) {
   return legendDiv;
 }
 
-// legend for unit color
+// // legend for unit color
 
-function legend2Style(map, unitColorScale, numvalues) {
-  const legendContent = document.querySelector('.legend-content');
+// function legend2Style(map, unitColorScale, numvalues) {
+//   const legendContent = document.querySelector('.legend-content');
 
-  // when reset, need to remove the previous unit legend first
-  if (legendContent.querySelector('.unit-legend') !== null) {
-    const oldLegend = legendContent.querySelector('.unit-legend');
-    legendContent.removeChild(oldLegend);
-  }
+//   // when reset, need to remove the previous unit legend first
+//   if (legendContent.querySelector('.unit-legend') !== null) {
+//     const oldLegend = legendContent.querySelector('.unit-legend');
+//     legendContent.removeChild(oldLegend);
+//   }
 
-  // create a new div to hold unit legend
-  const unitColorLegendDiv = document.createElement('div');
-  unitColorLegendDiv.classList.add('unit-legend');
-  let html = `
-    <strong><p>Group Number</p></strong>
-    <div class="catWrapper">
-  `;
+//   // create a new div to hold unit legend
+//   const unitColorLegendDiv = document.createElement('div');
+//   unitColorLegendDiv.classList.add('unit-legend');
+//   let html = `
+//     <strong><p>Group Number</p></strong>
+//     <div class="catWrapper">
+//   `;
 
-  for (let i = 0; i < numvalues; i++) {
-    html += `
-    <div class="colorTextPair">
-    <div class="catColorBox" style="background-color: ${unitColorScale(i / (numvalues - 1))}"></div>
-    <p class="catText">Group ${i+1}</p>
-    </div>
-    `;
-  }
+//   for (let i = 0; i < numvalues; i++) {
+//     html += `
+//     <div class="colorTextPair">
+//     <div class="catColorBox" style="background-color: ${unitColorScale(i / (numvalues - 1))}"></div>
+//     <p class="catText">Group ${i+1}</p>
+//     </div>
+//     `;
+//   }
 
-  html += '</div>'; // Close the wrapper
-  unitColorLegendDiv.innerHTML = html;
+//   html += '</div>'; // Close the wrapper
+//   unitColorLegendDiv.innerHTML = html;
 
-  legendContent.appendChild(unitColorLegendDiv);
-}
+//   legendContent.appendChild(unitColorLegendDiv);
+// }
 
 // legend for similarity color
 
@@ -397,9 +396,7 @@ function resetAllStyles(map) {
 }
 
 export {
-  initializeMap,
   initializeSimilarAreaMap,
   legend1Style,
-  legend2Style,
   legend3Style,
 };

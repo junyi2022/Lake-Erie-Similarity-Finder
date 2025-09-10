@@ -6,7 +6,7 @@
         <!-- add code to fit phone access -->
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <title>Lake Erie Coastal Units Toolbox</title>
+        <title>Lake Erie Similarity Finder Toolbox</title>
         <!-- add leaflet map css component -->
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -52,9 +52,12 @@
                 </button>
                 
                 <section class="cover">
-                    <h1 class="cover-title">Lake Erie Coastal Units Explorer</h1>
-                    <h3 class="cover-lab">University of Pennsylvania EMLab</h3>
-                    <p class="cover-description">This site is a working site for the process of the final web explorer. At its current state, it remains incomplete as the team is still working on the type of priority models that users can use to create their coastal units. However, the overall framework is complete, and feel free to play with it! If you find any bugs or errors when using this tool and are willing to share them with the team for future improvements, please email <em>junyiy@upenn.edu</em>. We really appreciate that!</p>
+                    <h1 class="cover-title">Lake Erie Coastal Similarity Finder</h1>
+                    <h3 class="cover-subtitle">NEW YORK HEALTHY COASTS AND COMMUNITIES:</h3>
+                    <h3 class="cover-subtitle">Passive Sediment Management Study for New York's Lake Erie Shoreline</h3>
+                    <h3 class="cover-lab">University of Pennsylvania Environmental Modeling Lab (EMLab)</h3>
+                    <p class="cover-description"><strong>Project Overview: </strong>This project situates local coastal processes as formative drivers for regional beach management/recovery and marina function. It explores ways to link coastal management decisions that work with coastal processes to achieve the protection, function, and recovery of ports, marinas, beaches, and other sediment-dependent coastal features. This process could be understood as “Passive” Sediment Management (PSM). As a deliverable, the research team will produce a passive sediment management study for the Lake Erie shore of New York that extends from across the Pennsylvania border to the start of the Niagara River. This plan will include the regional characterization of the various coastal forcing agents (wind, waves, longshore transport), the geologic and geomorphological contexts, and the social/cultural conditions along the Lake Erie shore. This regional information will be assembled, mapped, and analyzed to identify a series of coastal "units" that group reaches of the shoreline based on the above factors. Following this characterization, the plan will identify strategies that can leverage the synthesis of these various conditions to achieve needed benefits and outcomes in the general sense. This work aims to serve as a potential framework for future, more site-specific design and engineering projects that leverage PSM strategies, illustrating typologically what could be effective in specific areas of the New York shoreline. The design concepts produced will not be site or community-specific, but instead, will be situationally specific based on the coastal unit characterization. The goal of this working method is to establish possible design solutions that are both contextually specific by working with local conditions and transferable to other geographies that share similar attributes.</p>
+                    <p class="cover-description"><strong>Note: </strong>This site is a working site for the web tool of Similarity Finder. At its current state, it remains incomplete. If you find any bugs or errors when using this tool and are willing to share them with the team for future improvements, please email <em>junyiy@upenn.edu</em>. We really appreciate that!</p>
                     <button class="hide" onclick="slider.classList.add('collapsed')">
                     <!-- <button class="hide"> -->
                         <!-- https://www.svgrepo.com/svg/524509/double-alt-arrow-up?edit=true -->
@@ -72,7 +75,6 @@
             </div>
             <div class="menu-background">
                 <nav class="menu">
-                    <div class="unit-generator-button menu-cat"><strong>Unit Generator</strong></div>
                     <div class="find-similar-area menu-cat"><strong>Similarity Finder</strong></div>
                     <div class="data-explorer menu-cat"><strong>Data Explorer</strong></div>
                     <div class="documentation menu-cat"><strong>Documentation</strong></div>
@@ -101,7 +103,8 @@
                 <div class="loader-background"></div>
             </div>
             
-            <div id="unit-generator-body" class="container">
+
+            <div id="find-similar-area-body">
                 <dialog open class="start-box" id="start-box">
                     <!-- because of the settings of dialog tag, need to have a div within it to do the flex style -->
                     <div class="dialog-content">
@@ -117,135 +120,7 @@
                         </form>
                     </div>
                 </dialog>
-
-                <div class="toolbar">
-                    <section class="step">
-                        <div class="step-explain">
-                            <h4 class="unit-generator">Step 1: Choose your area</h4>
-                            <svg class="info-tag" width="25px" height="25px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                <g id="SVGRepo_iconCarrier"> 
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 11V13C5.5 16.3137 8.18629 19 11.5 19H13.5C16.8137 19 19.5 16.3137 19.5 13V11C19.5 7.68629 16.8137 5 13.5 5H11.5C8.18629 5 5.5 7.68629 5.5 11Z" stroke="#4f5b8c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> 
-                                    <path d="M11.75 16C11.75 16.4142 12.0858 16.75 12.5 16.75C12.9142 16.75 13.25 16.4142 13.25 16H11.75ZM12.5 11H13.25C13.25 10.5858 12.9142 10.25 12.5 10.25V11ZM11.5 10.25C11.0858 10.25 10.75 10.5858 10.75 11C10.75 11.4142 11.0858 11.75 11.5 11.75V10.25ZM12.5 16.75C12.9142 16.75 13.25 16.4142 13.25 16C13.25 15.5858 12.9142 15.25 12.5 15.25V16.75ZM11.5 15.25C11.0858 15.25 10.75 15.5858 10.75 16C10.75 16.4142 11.0858 16.75 11.5 16.75V15.25ZM12.5 15.25C12.0858 15.25 11.75 15.5858 11.75 16C11.75 16.4142 12.0858 16.75 12.5 16.75V15.25ZM13.5 16.75C13.9142 16.75 14.25 16.4142 14.25 16C14.25 15.5858 13.9142 15.25 13.5 15.25V16.75ZM13.25 8C13.25 7.58579 12.9142 7.25 12.5 7.25C12.0858 7.25 11.75 7.58579 11.75 8H13.25ZM11.75 9C11.75 9.41421 12.0858 9.75 12.5 9.75C12.9142 9.75 13.25 9.41421 13.25 9H11.75ZM13.25 16V11H11.75V16H13.25ZM12.5 10.25H11.5V11.75H12.5V10.25ZM12.5 15.25H11.5V16.75H12.5V15.25ZM12.5 16.75H13.5V15.25H12.5V16.75ZM11.75 8V9H13.25V8H11.75Z" fill="#4f5b8c"></path> 
-                                </g>
-                            </svg>
-                            <span id="step-1-pop"><p>Drag the markers to your area of interest, which will be the base of the calculations in the following steps.</p></span>
-                        </div>
-                        <p class="step-notes">Note: Will take a while to generate if the selected coastline is long.</p>
-                        <button class="select-point button">Start / Reset</button>
-                        <button class="finish-point button">Next</button>
-                        <button class="return-select-point button">Return to This Step</button>
-                    </section>
-
-                    <section class="step">
-
-                        <form class="step-two-form">
-
-                            <div class="step-explain step3-title">
-                                <h4 class="unit-generator">Step 2: Choose priority</h4>
-                                <svg class="info-tag" width="25px" height="25px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                    <g id="SVGRepo_iconCarrier"> 
-                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 11V13C5.5 16.3137 8.18629 19 11.5 19H13.5C16.8137 19 19.5 16.3137 19.5 13V11C19.5 7.68629 16.8137 5 13.5 5H11.5C8.18629 5 5.5 7.68629 5.5 11Z" stroke="#4f5b8c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> 
-                                        <path d="M11.75 16C11.75 16.4142 12.0858 16.75 12.5 16.75C12.9142 16.75 13.25 16.4142 13.25 16H11.75ZM12.5 11H13.25C13.25 10.5858 12.9142 10.25 12.5 10.25V11ZM11.5 10.25C11.0858 10.25 10.75 10.5858 10.75 11C10.75 11.4142 11.0858 11.75 11.5 11.75V10.25ZM12.5 16.75C12.9142 16.75 13.25 16.4142 13.25 16C13.25 15.5858 12.9142 15.25 12.5 15.25V16.75ZM11.5 15.25C11.0858 15.25 10.75 15.5858 10.75 16C10.75 16.4142 11.0858 16.75 11.5 16.75V15.25ZM12.5 15.25C12.0858 15.25 11.75 15.5858 11.75 16C11.75 16.4142 12.0858 16.75 12.5 16.75V15.25ZM13.5 16.75C13.9142 16.75 14.25 16.4142 14.25 16C14.25 15.5858 13.9142 15.25 13.5 15.25V16.75ZM13.25 8C13.25 7.58579 12.9142 7.25 12.5 7.25C12.0858 7.25 11.75 7.58579 11.75 8H13.25ZM11.75 9C11.75 9.41421 12.0858 9.75 12.5 9.75C12.9142 9.75 13.25 9.41421 13.25 9H11.75ZM13.25 16V11H11.75V16H13.25ZM12.5 10.25H11.5V11.75H12.5V10.25ZM12.5 15.25H11.5V16.75H12.5V15.25ZM12.5 16.75H13.5V15.25H12.5V16.75ZM11.75 8V9H13.25V8H11.75Z" fill="#4f5b8c"></path> 
-                                    </g>
-                                </svg>
-                                <span id="step-3-pop"><p>This step will do the socring for each resolution based on the criteria you choose in the Priority dropdown box and color each resolution by its final score.</p></span>
-                            </div>
-
-                            <div class="substep">
-                                <h5 class="substep-title">Priority</h5>
-                                <div class="piority-list">
-                                    <div class="choice-options">
-                                        <p>First: </p>
-                                        <p>Second: </p>
-                                        <p>Third: </p>
-                                    </div>
-                                    <div class="choice-options">
-                                        <select class="priority" id="first-priority" disabled="true" required>
-                                            <option value="">--Please choose an option--</option>
-                                            <option value="sl">Sediment Net Loss</option>
-                                            <option value="srr">Sediment Retreat Rate</option>
-                                            <option value="ep">Erosion Potential</option>
-                                            <option value="is">Invasive Species Control</option>
-                                            <option value="hp">Habitat Protection</option>
-                                            <option value="wpr">NOAA Wetland Protection/Restoration</option>
-                                            <option value="sv">NFWF Community Exposure</option>
-                                            <!-- <option value="pc">Physical Condition</option> -->
-                                        </select>
-                                        <select class="priority" id="second-priority" disabled="true" required>
-
-                                        </select>
-                                        <select class="priority" id="third-priority" disabled="true" required>
-
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                        <p class="step-notes">Note: Will take a while to generate.</p>
-                        <button class="generate-resolution button" disabled="true">(Re)Generate</button>
-                        <button class="finish-resolution button" disabled="true">Next</button>
-                        <button class="return-generate-resolution button">Return to This Step</button>
-                    </section>
-
-                    <section class="step">
-                        <div class="step-explain">
-                            <h4 class="unit-generator">Step 3: Group into Final Units</h4>
-                            <svg class="info-tag" width="25px" height="25px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                            <g id="SVGRepo_iconCarrier"> 
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 11V13C5.5 16.3137 8.18629 19 11.5 19H13.5C16.8137 19 19.5 16.3137 19.5 13V11C19.5 7.68629 16.8137 5 13.5 5H11.5C8.18629 5 5.5 7.68629 5.5 11Z" stroke="#4f5b8c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> 
-                                <path d="M11.75 16C11.75 16.4142 12.0858 16.75 12.5 16.75C12.9142 16.75 13.25 16.4142 13.25 16H11.75ZM12.5 11H13.25C13.25 10.5858 12.9142 10.25 12.5 10.25V11ZM11.5 10.25C11.0858 10.25 10.75 10.5858 10.75 11C10.75 11.4142 11.0858 11.75 11.5 11.75V10.25ZM12.5 16.75C12.9142 16.75 13.25 16.4142 13.25 16C13.25 15.5858 12.9142 15.25 12.5 15.25V16.75ZM11.5 15.25C11.0858 15.25 10.75 15.5858 10.75 16C10.75 16.4142 11.0858 16.75 11.5 16.75V15.25ZM12.5 15.25C12.0858 15.25 11.75 15.5858 11.75 16C11.75 16.4142 12.0858 16.75 12.5 16.75V15.25ZM13.5 16.75C13.9142 16.75 14.25 16.4142 14.25 16C14.25 15.5858 13.9142 15.25 13.5 15.25V16.75ZM13.25 8C13.25 7.58579 12.9142 7.25 12.5 7.25C12.0858 7.25 11.75 7.58579 11.75 8H13.25ZM11.75 9C11.75 9.41421 12.0858 9.75 12.5 9.75C12.9142 9.75 13.25 9.41421 13.25 9H11.75ZM13.25 16V11H11.75V16H13.25ZM12.5 10.25H11.5V11.75H12.5V10.25ZM12.5 15.25H11.5V16.75H12.5V15.25ZM12.5 16.75H13.5V15.25H12.5V16.75ZM11.75 8V9H13.25V8H11.75Z" fill="#4f5b8c"></path> 
-                            </g>
-                            </svg>
-                            <span id="step-4-pop"><p>This step will group the resolution with similar scores from step 2 to different Categories and display the final units through a box around each unit.</p></span>
-                        </div>
-                        
-                        <div class="substep">
-                            <h5 class="substep-title">Number of groups</h5>
-                            
-                                <input type="number" name="category-number-entry" class="category" placeholder="Type a number: e.g. 5" min="2" step="1" disabled="true" required autocomplete="off">
-                        </div>
-                        
-                        <button class="generate-group button" disabled="true">(Re)Generate</button>
-                        <button class="finish-group button" disabled="true">Next</button>
-                        <button class="return-generate-group button">Return to This Step</button>
-                    </section>
-
-                    <section class="step">
-                        <div class="step-explain">
-                            <h4 class="unit-generator">Step 4: Download</h4>
-                            <svg class="info-tag" width="25px" height="25px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                            <g id="SVGRepo_iconCarrier"> 
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 11V13C5.5 16.3137 8.18629 19 11.5 19H13.5C16.8137 19 19.5 16.3137 19.5 13V11C19.5 7.68629 16.8137 5 13.5 5H11.5C8.18629 5 5.5 7.68629 5.5 11Z" stroke="#4f5b8c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> 
-                                <path d="M11.75 16C11.75 16.4142 12.0858 16.75 12.5 16.75C12.9142 16.75 13.25 16.4142 13.25 16H11.75ZM12.5 11H13.25C13.25 10.5858 12.9142 10.25 12.5 10.25V11ZM11.5 10.25C11.0858 10.25 10.75 10.5858 10.75 11C10.75 11.4142 11.0858 11.75 11.5 11.75V10.25ZM12.5 16.75C12.9142 16.75 13.25 16.4142 13.25 16C13.25 15.5858 12.9142 15.25 12.5 15.25V16.75ZM11.5 15.25C11.0858 15.25 10.75 15.5858 10.75 16C10.75 16.4142 11.0858 16.75 11.5 16.75V15.25ZM12.5 15.25C12.0858 15.25 11.75 15.5858 11.75 16C11.75 16.4142 12.0858 16.75 12.5 16.75V15.25ZM13.5 16.75C13.9142 16.75 14.25 16.4142 14.25 16C14.25 15.5858 13.9142 15.25 13.5 15.25V16.75ZM13.25 8C13.25 7.58579 12.9142 7.25 12.5 7.25C12.0858 7.25 11.75 7.58579 11.75 8H13.25ZM11.75 9C11.75 9.41421 12.0858 9.75 12.5 9.75C12.9142 9.75 13.25 9.41421 13.25 9H11.75ZM13.25 16V11H11.75V16H13.25ZM12.5 10.25H11.5V11.75H12.5V10.25ZM12.5 15.25H11.5V16.75H12.5V15.25ZM12.5 16.75H13.5V15.25H12.5V16.75ZM11.75 8V9H13.25V8H11.75Z" fill="#4f5b8c"></path> 
-                            </g>
-                            </svg>
-                            <span id="step-5-pop-unit"><p>This step will download the generated unit and save it as either geojson or shapefile.</p></span>
-                        </div>
-                        <div class="substep">
-                            <h5 class="substep-title">Download Units</h5>
-                            <select class="file-type" disabled="true">
-                                <option value="geojson">geojson</option>
-                                <option value="shapefile">shapefile</option>
-                            </select>
-                            <button class="download-unit button" disabled="true">Download</button>
-                        </div>
-                    </section>
-                        
-                </div>
-                <div id="map1"></div>    
-            </div>
-
-
-
-            <div id="find-similar-area-body" class="container">
+                
                 <div class="toolbar">
                     <section class="step">
                         <div class="step-explain">

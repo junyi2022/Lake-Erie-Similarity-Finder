@@ -5,11 +5,11 @@
     justify-content: center;
     background-color: rgba(174, 196, 174, 0.2);
     position: absolute;
-    height: 400px;
+    height: 75vh;
     width: 100vw;
     top: 50%;
     left: 50%;
-    margin-top: -200px;
+    margin-top: -37.5vh;
     margin-left: -50vw;
 }
 
@@ -18,14 +18,24 @@
     font-size: 35px;
 }
 
+.cover-subtitle {
+    color: rgb(74, 73, 75);
+    font-size: 18px;
+    margin-top: 0px;
+    margin-bottom: 5px;
+    font-style: italic;
+}
+
 .cover-lab,
 .cover-description {
     color: rgb(74, 73, 75);
-    margin-top: 20px;
+    margin-top: 15px;
+    font-size: 15px;
 }
 
 .cover-description {
     width: 80vw;
+    max-width: 1200px;
 }
 
 /* button styles */

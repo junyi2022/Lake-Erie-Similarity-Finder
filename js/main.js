@@ -1,6 +1,6 @@
 /* globals turf */
 
-import { initializeMap } from './map.js';
+import { initializeSimilarAreaMap } from './map.js';
 import { handleMenuBar } from './control.js';
 
 
@@ -69,7 +69,7 @@ window.slope = slope;
 
 // map for unit generator
 // Other maps shouldn't be called here since they are not shown up at the beginning and have display = none
-window.map = initializeMap(censusTracts, dataBoundary, huc10, huc12, shorelineBase, county, sendimentBudget); // remember to add new layer her as well
+window.map = initializeSimilarAreaMap(censusTracts, dataBoundary, huc10, huc12, shorelineBase, county, sendimentBudget); // remember to add new layer her as well
 
 // menu bar
 handleMenuBar();
