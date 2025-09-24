@@ -1,41 +1,3 @@
-// handle dynamic dropdown
-
-const dropdownOptions = [
-  {'label': '--Please choose an option--', 'value': ''},
-  {'label': 'Coastal Conditions', 'value': 'cc'},
-  {'label': 'Coastal Processes', 'value': 'cp'},
-  {'label': 'Combined Models', 'value': 'cm'},
-  {'label': 'Sediment Net Loss', 'value': 'sl'},
-  // {'label': 'Sediment Gain', 'value': 'sg'},
-  {'label': 'Erosion Potential', 'value': 'ep'},
-  {'label': 'Invasive Species Control', 'value': 'is'},
-  {'label': 'Habitat Protection', 'value': 'hp'},
-  {'label': 'NOAA Wetland Protection/Restoration', 'value': 'wpr'},
-  {'label': 'NFWF Community Exposure', 'value': 'sv'},
-  // {'label': 'Physical Condition', 'value': 'pc'},
-];
-
-function handleDropdownDisplay(DropdownSelect, exclude=[]) {
-  DropdownSelect.innerHTML = '';
-  // if the previous priority selection includes no selection, there should not be other choices for the following dropdown boxes
-  if (exclude.includes('ns')) {
-    DropdownSelect.innerHTML += `
-    <option value="">--Please choose an option--</option>
-    <option value="ns">No Selection</option>
-    `;
-  // if there is no no selection above
-  } else {
-    for (const option of dropdownOptions) {
-      if (!exclude.includes(option.value)) {
-        DropdownSelect.innerHTML += `
-          <option value="${option.value}">${option.label}</option>
-        `;
-      }
-    }
-    DropdownSelect.innerHTML += '<option value="ns">No Selection</option>';
-  }
-}
-
 // handle loading spinner
 
 const spinner = document.getElementById('loader');
@@ -60,19 +22,6 @@ function withSpinnerDo(callback) {
     callback();
     hideSpinner();
   }, 0);
-}
-
-// handle input box input value range
-// category groups validation
-
-function unitInputRange(categoryBox) {
-  categoryBox.addEventListener('change', () => {
-    const inputNum = parseInt(categoryBox.value);
-    if (inputNum < 2) {
-      categoryBox.value = '';
-      alert('Please enter a number greater than 1.');
-    }
-  });
 }
 
 // handle range input dynamics
@@ -188,11 +137,9 @@ function displaySelectPointScoreOnRange(score) {
 
 
 export {
-  handleDropdownDisplay,
   showSpinner,
   hideSpinner,
   withSpinnerDo,
-  unitInputRange,
   getParsed,
   displaySelectPointScoreOnRange,
 };

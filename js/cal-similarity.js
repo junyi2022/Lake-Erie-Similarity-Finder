@@ -1,11 +1,11 @@
 /* globals turf */
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
-import { findClosestData } from './model.js';
 import { legend1Style, legend3Style } from './map.js';
-import { handleDropdownDisplay, withSpinnerDo, displaySelectPointScoreOnRange, getParsed } from './logistics.js';
+import { coastalProcessing } from './main.js';
+import { withSpinnerDo, displaySelectPointScoreOnRange, getParsed } from './logistics.js';
 import { modelName, colorScale, unitColorScale, getMinMaxFromFeatureArray, handleDownload, clearDynamicDropdown } from './cal.js';
-import { initializePoints, handleMarkerSnap, getFtResolution, munipulateResCollection } from './cal.js';
+import { initializePoints, handleMarkerSnap, getFtResolution } from './cal.js';
 
 // similar finder inputs
 // get step 1 buttons
@@ -13,14 +13,13 @@ const startButtonSim = document.querySelector('.select-point-sim');
 const finishButtonSim = document.querySelector('.finish-point-sim');
 const returnStartButtonSim = document.querySelector('.return-select-point-sim');
 // get step 2 input boxes
-const step2FormSim = document.querySelector('.step-two-form-sim');
 const firstDropSim = document.querySelector('#first-priority-sim');
-const secondDropSim = document.querySelector('#second-priority-sim');
-const thirdDropSim = document.querySelector('#third-priority-sim');
+// const secondDropSim = document.querySelector('#second-priority-sim');
+// const thirdDropSim = document.querySelector('#third-priority-sim');
 const dropdownAllSim = document.getElementsByClassName('priority-sim'); // all dropdown boxes
-const generateResButtonSim = document.querySelector('.generate-resolution-sim');
-const finishResButtonSim = document.querySelector('.finish-resolution-sim');
-const returnGenerateResButtonSim = document.querySelector('.return-generate-resolution-sim');
+const showModelButton = document.querySelector('.show-model-sim');
+const finishShowModel = document.querySelector('.finish-show-model-sim');
+const returnShowModelButton = document.querySelector('.return-show-model-sim');
 // get step 3 buttons
 const fromSliderSim = document.querySelector('#fromSlider');
 const toSliderSim = document.querySelector('#toSlider');
@@ -118,23 +117,11 @@ function calResForSimilarity(newMid, coastLine, map) {
   map.pickPointLayer.addData(midPointSelect);
 
   // enable step 2 buttons
-  generateResButtonSim.disabled = false;
-  finishResButtonSim.disabled = false;
+  showModelButton.disabled = false;
+  finishShowModel.disabled = false;
 
   // handle setp 2 dropdown options
   firstDropSim.disabled = false;
-  firstDropSim.addEventListener('change', () => {
-    const firstDropSimChoice = firstDropSim.value;
-    handleDropdownDisplay(secondDropSim, [firstDropSimChoice]);
-    secondDropSim.disabled = false;
-  });
-
-  secondDropSim.addEventListener('change', () => {
-    const firstDropSimChoice = firstDropSim.value;
-    const secondDropSimChoice = secondDropSim.value;
-    handleDropdownDisplay(thirdDropSim, [firstDropSimChoice, secondDropSimChoice]);
-    thirdDropSim.disabled = false;
-  });
 
   // handle return button
   returnStartButtonSim.addEventListener('click', () => {
@@ -144,15 +131,21 @@ function calResForSimilarity(newMid, coastLine, map) {
   });
 
   // handle inputs from form
-  generateResButtonSim.addEventListener('click', () => {
+  showModelButton.addEventListener('click', () => {
     withSpinnerDo(() => {
-      handleSimCalculations(midPointSelect, step2FormSim, firstDropSim, secondDropSim, thirdDropSim, map, coastLine);
+      handleSimCalculations(midPointSelect, firstDropSim, map, coastLine);
     });
   });
 }
 
 // actual res calculations
-function handleSimCalculations(midPointSelect, step2Form, firstDrop, secondDrop, thirdDrop, map, coastalLine) {
+function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
+  const modelSelect = {
+  'cp': window.coastalProcessing,
+  // 'cc': 'valueCoastalCondition',
+  // 'cm': 'valueCombinedModel'
+  };
+
   // zoom to the whole coastline
   map.fitBounds(map.zoomRefLayer.getBounds());
 
@@ -160,16 +153,17 @@ function handleSimCalculations(midPointSelect, step2Form, firstDrop, secondDrop,
     map.colorLayer.clearLayers();
   }
 
-  // check all the boxes are filled
-  // process to the calculations when we have everything
-  if (step2FormSim.reportValidity() == false) {
-    return; // this just means stop
+  // get which model is selected
+  if (firstDropSim.value === '') {
+    alert('Please select at least one priority to proceed.');
+    return;
   }
-
-  const resolutionCollection = getFtResolution(coastalLine, 5000); // feature collection of a lot of linestrings
+  const resolutionCollection = modelSelect[firstDropSim.value]; // feature collection of the selected model
   console.log(resolutionCollection);
 
-  const [firstProp, secondProp, thirdProp] = munipulateResCollection(map, resolutionCollection, firstDrop, secondDrop, thirdDrop);
+  // assign selected model properties to each piece
+  
+
 
   // add the resolution data to map and color that based on the final score of each coastline piece
   map.colorLayer = L.geoJSON(resolutionCollection, {
@@ -202,7 +196,7 @@ function handleSimCalculations(midPointSelect, step2Form, firstDrop, secondDrop,
     });
 
   // process to the following step if user click next
-  finishResButtonSim.addEventListener('click', () => {
+  finishShowModel.addEventListener('click', () => {
     simGroupRes(map, resolutionCollection, firstProp, secondProp, thirdProp, pointScore);
   });
 }
@@ -218,8 +212,8 @@ function simGroupRes(map, resolutionCollection, firstProp, secondProp, thirdProp
   finishGroupButtonSim.disabled = false;
 
   // disable step 2 buttons
-  finishResButtonSim.disabled = true;
-  generateResButtonSim.disabled = true;
+  finishShowModel.disabled = true;
+  showModelButton.disabled = true;
   for (const i of dropdownAllSim) {
     i.disabled = true;
   }
@@ -228,7 +222,7 @@ function simGroupRes(map, resolutionCollection, firstProp, secondProp, thirdProp
   displaySelectPointScoreOnRange(pointScore[0].properties.finalValueNormal.toFixed(2));
 
   // handle return to priority step
-  returnGenerateResButtonSim.addEventListener('click', () => {
+  returnShowModelButton.addEventListener('click', () => {
     returnToSliderGroup();
     returnToGenerateResSim(map);
   });
@@ -387,8 +381,8 @@ function returnToSliderGroup() {
 
 function returnToGenerateResSim(map) {
   // enable dropdown boxes
-  generateResButtonSim.disabled = false;
-  finishResButtonSim.disabled = false;
+  showModelButton.disabled = false;
+  finishShowModel.disabled = false;
   for (const i of dropdownAllSim) {
     i.disabled = false;
   }
@@ -425,8 +419,8 @@ function returnToStartSim(map, coastLine) {
   startButtonSim.disabled = false;
   finishButtonSim.disabled = false;
   // disable step 2 buttons
-  generateResButtonSim.disabled = true;
-  finishResButtonSim.disabled = true;
+  showModelButton.disabled = true;
+  finishShowModel.disabled = true;
   firstDropSim.value = '';
   // clear dynamic dropdown
   clearDynamicDropdown('#second-priority-sim');
@@ -449,6 +443,24 @@ function returnToStartSim(map, coastLine) {
     handleMarkerSnap(coastLine, updatedMarker, map);
   });
   map.legend.remove();
+}
+
+// find closest polygon and get properties
+function findClosestData(whichData, coastline) {
+  const coastlinecenter = turf.pointOnFeature(coastline);
+  // need to loop through each shape to get center points because the turf function only take one shape each time
+
+  const centers = whichData.features.map((feature) => {
+    const featureCenter = turf.pointOnFeature(feature);
+    featureCenter.properties = feature.properties; // add all feature properties to point properties (although we don't need it later)
+    return featureCenter;
+  });
+
+  // find nearest center point and use that to get the park shape
+  const dataNear = turf.nearestPoint(coastlinecenter, turf.featureCollection(centers)); // truf function take turf feature collection, not just simple array
+
+  const prop = [dataNear];
+  return prop;
 }
 
 export {
