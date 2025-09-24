@@ -200,7 +200,7 @@ function legend1Style(map, colorScale, divname) {
   const resColorLegendDiv = document.createElement('div');
   resColorLegendDiv.classList.add('res-legend');
   resColorLegendDiv.innerHTML = `
-    <strong><p>Resolution Score from Low to High</p></strong>
+    <strong><p>Model Score from Low to High</p></strong>
     <div class="resColorBox" style="background: linear-gradient(90deg, ${colorScale(0)}, ${colorScale(0.25)}, ${colorScale(0.5)}, ${colorScale(0.75)}, ${colorScale(1)})"></div>
   `;
 

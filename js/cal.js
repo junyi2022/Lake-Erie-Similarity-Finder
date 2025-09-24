@@ -7,13 +7,6 @@ import {
   // combinedModelCal 
 } from './model.js';
 
-// list all the dropdown's avaliable models and associated properties
-const modelFuncs = {
-  'cp': coastalProcessCal,
-  // 'cc': coastalConditionCal,
-  // 'cm': combinedModelCal
-};
-
 const modelName = {
   'cp': 'Length of Coastal Process',
   'cc': 'Area of Coastal Condition',
@@ -305,7 +298,6 @@ function clearDynamicDropdown(ID) {
 
 
 export {
-  modelFuncs,
   modelName,
   colorScale,
   unitColorScale,

@@ -1,12 +1,12 @@
 /* globals turf */
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
-import { getResolutionBoxes } from './cal.js';
-
-function coastalProcessCal(coastalProcessing) {
-    for (let i = 0; i < coastalProcessing.feature.length; i++) {
+// calculate coastal processing length
+function coastalProcessCal(coastalProcessing, propertiesName) {
+    for (let i = 0; i < coastalProcessing.features.length; i++) {
         const sedimentNetLoss = coastalProcessing.features[i].properties.CalSedi;
         const retreatRate = coastalProcessing.features[i].properties.CalRetreat;
+        coastalProcessing.features[i].properties[propertiesName] = sedimentNetLoss + retreatRate;
     }
 }
 

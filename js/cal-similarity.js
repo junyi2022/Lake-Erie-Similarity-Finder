@@ -2,7 +2,7 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
 import { legend1Style, legend3Style } from './map.js';
-import { coastalProcessing } from './main.js';
+import {coastalProcessCal} from './model.js';
 import { withSpinnerDo, displaySelectPointScoreOnRange, getParsed } from './logistics.js';
 import { modelName, colorScale, unitColorScale, getMinMaxFromFeatureArray, handleDownload, clearDynamicDropdown } from './cal.js';
 import { initializePoints, handleMarkerSnap, getFtResolution } from './cal.js';
@@ -140,10 +140,26 @@ function calResForSimilarity(newMid, coastLine, map) {
 
 // actual res calculations
 function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
+
+  // selected model options
   const modelSelect = {
   'cp': window.coastalProcessing,
   // 'cc': 'valueCoastalCondition',
   // 'cm': 'valueCombinedModel'
+  };
+
+  // list all the dropdown's avaliable models and associated properties
+  const modelFuncs = {
+    'cp': coastalProcessCal,
+    // 'cc': coastalConditionCal,
+    // 'cm': combinedModelCal
+  };
+
+  // name in properties for each model
+  const modelNames = {
+    'cp': 'cpLength',
+    // 'cc': 'ccArea',
+    // 'cm': 'cmValue'
   };
 
   // zoom to the whole coastline
@@ -159,16 +175,37 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
     return;
   }
   const resolutionCollection = modelSelect[firstDropSim.value]; // feature collection of the selected model
+
+  const calMethod = modelFuncs[firstDropSim.value]; // calculation function of the selected model
+  const propertiesName = modelNames[firstDropSim.value]; // new property name of the selected model
+  calMethod(resolutionCollection, propertiesName);
+
+  // need to normalize the values in order for color scale to work in 0 to 1 range
+  const propertiesValueArray = resolutionCollection.features.map((f) => f.properties[propertiesName]); // map will return an array of all the properties[propertiesName]
+
+  // calculate the min max of the values
+  const min = Math.min(...propertiesValueArray); // ...flatten the array because min/max doesn't take array
+  const max = Math.max(...propertiesValueArray);
+
+  // use a D3 scale to normalize this data
+  // see avaliable scale here: https://d3js.org/d3-scale
+  // scale descriptions: https://observablehq.com/@d3/continuous-scales
+  // here use power scale
+  // scale factor is the thing to control the shape of the reprojection
+  const scaleFunc = d3.scalePow([min, max], [0, 1]).exponent(1);
+  // add the normalized value to each coastline properties
+  for (const coastline of resolutionCollection.features) {
+    const normalResult = scaleFunc(coastline.properties[propertiesName]);
+    const newPropName = propertiesName + 'Normal';
+    coastline.properties[newPropName] = normalResult;
+  }
+
   console.log(resolutionCollection);
 
-  // assign selected model properties to each piece
-  
-
-
-  // add the resolution data to map and color that based on the final score of each coastline piece
+  // add the selected data to map and color that based on the normalized score of each coastline piece
   map.colorLayer = L.geoJSON(resolutionCollection, {
     style: (sample) => {
-      const colorValue = colorScale(sample.properties.finalValueNormal);
+      const colorValue = colorScale(sample.properties[propertiesName + 'Normal']);
       return {
         stroke: true,
         color: colorValue,
@@ -185,24 +222,24 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
 
   // find final score for the selected point
   // findClosestData only takes polygon/line, not point, so need to buffer the point
-  const bufferedPoint = turf.buffer(midPointSelect, 0.1);
+  const bufferedPoint = turf.buffer(midPointSelect, 0.05);
   const pointScore = findClosestData(resolutionCollection, bufferedPoint);
 
   map.pickPointLayer.bringToFront()
     .bindTooltip((l) => { // final unit box tooltip options
-      return `<p class="unit-tooltip"><strong>Final score: </strong>${pointScore[0].properties.finalValueNormal.toFixed(2)}</p>`;
+      return `<p class="unit-tooltip"><strong>Final score: </strong>${pointScore[0].properties[propertiesName].toFixed(2)}</p>`;
     }).bindPopup((l) => { // final unit box popup options
-      return `<p class="unit-tooltip">Your selected point has a final score of <strong>${pointScore[0].properties.finalValueNormal.toFixed(2)}</strong></p>`;
+      return `<p class="unit-tooltip">Your selected point has a final score of <strong>${pointScore[0].properties[propertiesName].toFixed(2)}</strong></p>`;
     });
 
   // process to the following step if user click next
   finishShowModel.addEventListener('click', () => {
-    simGroupRes(map, resolutionCollection, firstProp, secondProp, thirdProp, pointScore);
+    simGroupRes(map, resolutionCollection, firstDropSim, pointScore);
   });
 }
 
 // prepare for filtering
-function simGroupRes(map, resolutionCollection, firstProp, secondProp, thirdProp, pointScore) {
+function simGroupRes(map, resolutionCollection, firstDropSim, pointScore) {
   // enable step 3 box
   fromSliderSim.disabled = false;
   toSliderSim.disabled = false;
