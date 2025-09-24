@@ -178,6 +178,7 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
 
   const calMethod = modelFuncs[firstDropSim.value]; // calculation function of the selected model
   const propertiesName = modelNames[firstDropSim.value]; // new property name of the selected model
+  const propertiesNameNormal = propertiesName + 'Normal';
   calMethod(resolutionCollection, propertiesName);
 
   // need to normalize the values in order for color scale to work in 0 to 1 range
@@ -196,8 +197,7 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
   // add the normalized value to each coastline properties
   for (const coastline of resolutionCollection.features) {
     const normalResult = scaleFunc(coastline.properties[propertiesName]);
-    const newPropName = propertiesName + 'Normal';
-    coastline.properties[newPropName] = normalResult;
+    coastline.properties[propertiesNameNormal] = normalResult;
   }
 
   console.log(resolutionCollection);
@@ -205,7 +205,7 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
   // add the selected data to map and color that based on the normalized score of each coastline piece
   map.colorLayer = L.geoJSON(resolutionCollection, {
     style: (sample) => {
-      const colorValue = colorScale(sample.properties[propertiesName + 'Normal']);
+      const colorValue = colorScale(sample.properties[propertiesNameNormal]);
       return {
         stroke: true,
         color: colorValue,
@@ -226,20 +226,33 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
   const pointScore = findClosestData(resolutionCollection, bufferedPoint);
 
   map.pickPointLayer.bringToFront()
-    .bindTooltip((l) => { // final unit box tooltip options
-      return `<p class="unit-tooltip"><strong>Final score: </strong>${pointScore[0].properties[propertiesName].toFixed(2)}</p>`;
-    }).bindPopup((l) => { // final unit box popup options
-      return `<p class="unit-tooltip">Your selected point has a final score of <strong>${pointScore[0].properties[propertiesName].toFixed(2)}</strong></p>`;
+    .bindTooltip((l) => {
+      return `
+        <p class="unit-tooltip"><strong>Final score: </strong>${pointScore[0].properties[propertiesName].toFixed(2)}</p>
+        <p class="unit-tooltip"><strong>Normalized score: </strong>${pointScore[0].properties[propertiesNameNormal].toFixed(2)}</p>
+      `;
+    }).bindPopup((l) => {
+      return `
+        <p class="unit-tooltip">Your selected point has a final score of <strong>${pointScore[0].properties[propertiesName].toFixed(2)}</strong></p>
+        <p class="unit-tooltip">Your selected point has a Normalized score of <strong>${pointScore[0].properties[propertiesNameNormal].toFixed(2)}</strong></p>
+      `;
     });
+
+  map.colorLayer.bindTooltip((l) => { 
+    return `
+      <p class="unit-tooltip"><strong>Final score: </strong>${l.feature.properties[propertiesName].toFixed(2)}</p>
+      <p class="unit-tooltip"><strong>Normalized score: </strong>${l.feature.properties[propertiesNameNormal].toFixed(2)}</p>
+    `;
+  });
 
   // process to the following step if user click next
   finishShowModel.addEventListener('click', () => {
-    simGroupRes(map, resolutionCollection, firstDropSim, pointScore);
+    simGroupRes(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal);
   });
 }
 
 // prepare for filtering
-function simGroupRes(map, resolutionCollection, firstDropSim, pointScore) {
+function simGroupRes(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal) {
   // enable step 3 box
   fromSliderSim.disabled = false;
   toSliderSim.disabled = false;
@@ -251,12 +264,10 @@ function simGroupRes(map, resolutionCollection, firstDropSim, pointScore) {
   // disable step 2 buttons
   finishShowModel.disabled = true;
   showModelButton.disabled = true;
-  for (const i of dropdownAllSim) {
-    i.disabled = true;
-  }
+  firstDropSim.disabled = true;
 
   // add selected point's score to range bar
-  displaySelectPointScoreOnRange(pointScore[0].properties.finalValueNormal.toFixed(2));
+  displaySelectPointScoreOnRange(pointScore[0].properties[propertiesNameNormal].toFixed(2));
 
   // handle return to priority step
   returnShowModelButton.addEventListener('click', () => {
@@ -266,12 +277,12 @@ function simGroupRes(map, resolutionCollection, firstDropSim, pointScore) {
 
   // handle range input
   generateGroupButtonSim.addEventListener('click', () => {
-    handleGroupResSim(map, resolutionCollection, firstProp, secondProp, thirdProp, pointScore);
+    handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal);
   });
 }
 
 // filter by range
-function handleGroupResSim(map, resolutionCollection, firstProp, secondProp, thirdProp, pointScore) {
+function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal) {
   // zoom to the whole coastline
   map.fitBounds(map.zoomRefLayer.getBounds());
   // clear any existing features / reset
@@ -295,7 +306,7 @@ function handleGroupResSim(map, resolutionCollection, firstProp, secondProp, thi
     return;
   }
 
-  const [simGeojson, minSim, maxSim] = selectSimToGeojson(resolutionCollection, from, to, pointScore);
+  const [simGeojson, minSim, maxSim] = selectSimToGeojson(resolutionCollection, from, to, pointScore, propertiesNameNormal);
   console.log(simGeojson);
 
   // add unit legend
@@ -368,25 +379,25 @@ function handleGroupResSim(map, resolutionCollection, firstProp, secondProp, thi
 }
 
 // use input range to get the final geojson
-function selectSimToGeojson(resolutionCollection, from, to, pointScore) {
+function selectSimToGeojson(resolutionCollection, from, to, pointScore, propertiesNameNormal) {
   // pick the res in the selected range
   const groupArray = [];
   for (let i = 0; i < resolutionCollection.features.length; i++) {
-    const eachResScore = resolutionCollection.features[i].properties.finalValueNormal;
+    const eachResScore = resolutionCollection.features[i].properties[propertiesNameNormal];
     if (eachResScore >= from && eachResScore <= to) {
       groupArray.push(resolutionCollection.features[i]);
     }
   }
 
   // Calculate the similarity value based on normal final value, need to normalize it to make sure it will be between 0 and 1
-  const [minFinal, maxFinal] = getMinMaxFromFeatureArray(groupArray, 'finalValueNormal');
+  const [minFinal, maxFinal] = getMinMaxFromFeatureArray(groupArray, propertiesNameNormal);
   // here use power scale
   const scaleFunc = d3.scalePow([minFinal, maxFinal], [0, 1]).exponent(1);
-  const selectPointSimRefScore = scaleFunc(pointScore[0].properties.finalValueNormal);
+  const selectPointSimRefScore = scaleFunc(pointScore[0].properties[propertiesNameNormal]);
 
   for (let i = 0; i < groupArray.length; i++) {
     groupArray[i].properties.ID = i; // need to update the ID
-    groupArray[i].properties.simRefScore = scaleFunc(groupArray[i].properties.finalValueNormal);
+    groupArray[i].properties.simRefScore = scaleFunc(groupArray[i].properties[propertiesNameNormal]);
     // similarity is the absolute difference between the selected point's score and the current score
     if (groupArray[i].properties.simRefScore !== selectPointSimRefScore) {
       groupArray[i].properties.similarity = Math.abs(groupArray[i].properties.simRefScore - selectPointSimRefScore);
