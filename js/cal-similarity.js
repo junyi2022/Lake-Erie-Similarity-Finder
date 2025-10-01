@@ -2,7 +2,7 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
 import { legend1Style, legend3Style } from './map.js';
-import {coastalProcessCal} from './model.js';
+import {coastalProcessCal, coastalProcessSim} from './model.js';
 import { withSpinnerDo, displaySelectPointScoreOnRange, getParsed } from './logistics.js';
 import { modelName, colorScale, unitColorScale, getMinMaxFromFeatureArray, handleDownload, clearDynamicDropdown } from './cal.js';
 import { initializePoints, handleMarkerSnap, getFtResolution } from './cal.js';
@@ -156,11 +156,17 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
   };
 
   // name in properties for each model
-  const modelNames = {
+  const modelNamesInProperties = {
     'cp': 'cpLength',
     // 'cc': 'ccArea',
     // 'cm': 'cmValue'
   };
+
+  const modelSimFuncs = {
+    'cp': coastalProcessSim,
+    // 'cc': coastalConditionSim,
+    // 'cm': combinedModelSim
+  }
 
   // zoom to the whole coastline
   map.fitBounds(map.zoomRefLayer.getBounds());
@@ -177,7 +183,8 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
   const resolutionCollection = modelSelect[firstDropSim.value]; // feature collection of the selected model
 
   const calMethod = modelFuncs[firstDropSim.value]; // calculation function of the selected model
-  const propertiesName = modelNames[firstDropSim.value]; // new property name of the selected model
+  const propertiesName = modelNamesInProperties[firstDropSim.value]; // new property name of the selected model
+  const simCalModel = modelSimFuncs[firstDropSim.value]; // similarity function of the selected model
   const propertiesNameNormal = propertiesName + 'Normal';
   calMethod(resolutionCollection, propertiesName);
 
@@ -223,7 +230,8 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
   // find final score for the selected point
   // findClosestData only takes polygon/line, not point, so need to buffer the point
   const bufferedPoint = turf.buffer(midPointSelect, 0.05);
-  const pointScore = findClosestData(resolutionCollection, bufferedPoint);
+  var pointScore = null;
+  pointScore = findClosestData(resolutionCollection, bufferedPoint);
 
   map.pickPointLayer.bringToFront()
     .bindTooltip((l) => {
@@ -247,12 +255,12 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
 
   // process to the following step if user click next
   finishShowModel.addEventListener('click', () => {
-    simGroupRes(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal);
+    simGroupRes(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal, simCalModel, modelNamesInProperties);
   });
 }
 
 // prepare for filtering
-function simGroupRes(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal) {
+function simGroupRes(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal, simCalModel, modelNamesInProperties) {
   // enable step 3 box
   fromSliderSim.disabled = false;
   toSliderSim.disabled = false;
@@ -277,12 +285,12 @@ function simGroupRes(map, resolutionCollection, firstDropSim, pointScore, proper
 
   // handle range input
   generateGroupButtonSim.addEventListener('click', () => {
-    handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal);
+    handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal, simCalModel, modelNamesInProperties);
   });
 }
 
 // filter by range
-function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal) {
+function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal, simCalModel, modelNamesInProperties) {
   // zoom to the whole coastline
   map.fitBounds(map.zoomRefLayer.getBounds());
   // clear any existing features / reset
@@ -290,23 +298,28 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
     map.finalSimLayer.clearLayers();
   }
 
-  // For some reasons, the selected point's score is not updated in a timely manner, so here get the score from the label on the slider.
-  // If use the pointScore[0].properties.finalValueNormal, it will be the score of the last selected point and send the alert below twice and automatically fixed itself.
-  const divElement = document.getElementById('select-point-box-text');
-  const textContent = divElement.textContent;
-  const scoreValue = textContent.replace('Selected Point: ', '').trim();
-  const scoreValueNum = Number(scoreValue);
+  // // For some reasons, the selected point's score is not updated in a timely manner, so here get the score from the label on the slider.
+  // // If use the pointScore[0].properties.finalValueNormal, it will be the score of the last selected point and send the alert below twice and automatically fixed itself.
+  // const divElement = document.getElementById('select-point-box-text');
+  // // this is the normalized score
+  // const textContent = divElement.textContent;
+  // const scoreValue = textContent.replace('Selected Point: ', '').trim();
+  // const scoreValueNum = Number(scoreValue);
+
+  const scoreValueNum = pointScore[0].properties[propertiesNameNormal];
+
 
   // get range input values
   const [from, to] = getParsed(fromSliderSim, toSliderSim);
 
-  // check if the range is valid
-  if (scoreValueNum < from || scoreValueNum > to) {
-    alert('Please make sure the range includes the selected point\'s score.');
-    return;
-  }
+  // // check if the range is valid
+  // if (scoreValueNum < from || scoreValueNum > to) {
+  //   alert('Please make sure the range includes the selected point\'s score.');
+  //   return;
+  // }
 
-  const [simGeojson, minSim, maxSim] = selectSimToGeojson(resolutionCollection, from, to, pointScore, propertiesNameNormal);
+  // calculate similarity based on selected model
+  const [simGeojson, minSim, maxSim] = selectSimToGeojson(resolutionCollection, from, to, pointScore, simCalModel);
   console.log(simGeojson);
 
   // add unit legend
@@ -315,49 +328,18 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
   // add the res in the selected range to map and color that based on the normal final score of each coastline piece
   // adjust pop up based on number of selected priorities
   const firstPropName = modelName[firstDropSim.value];
-  if (secondDropSim.value == 'ns') {
-    map.finalSimLayer = L.geoJSON(simGeojson, rangeColorStyle).bindTooltip((l) => { // final unit box tooltip options
-      return `<p class="unit-tooltip"><strong>Difference:</strong> ${(l.feature.properties.similarity).toFixed(2)}</p>`;
-    }).bindPopup((l) => { // final unit box popup options
-      return `<h3 class="unit-pop-title">ID: ${l.feature.properties.ID + 1}</h3>
-              <p class="unit-finalscore"><strong>Difference:</strong> ${(l.feature.properties.similarity).toFixed(2)}</p>
-              <p class="unit-finalscore"><strong>Final Score:</strong> ${l.feature.properties.finalValueNormal.toFixed(2)}</p>
-              <p class="unit-first-priority"><strong>${firstPropName}:</strong> ${l.feature.properties[firstProp].toFixed(2)}</p>
-      `;
-    }).addTo(map);
-    map.colorLayer.bringToFront();
-    map.pickPointLayer.bringToFront();
-  } else if (thirdDropSim.value == 'ns') {
-    const secondPropName = modelName[secondDropSim.value];
-    map.finalSimLayer = L.geoJSON(simGeojson, rangeColorStyle).bindTooltip((l) => { // final unit box tooltip options
-      return `<p class="unit-tooltip"><strong>Difference:</strong> ${(l.feature.properties.similarity).toFixed(2)}</p>`;
-    }).bindPopup((l) => { // final unit box popup options
-      return `<h3 class="unit-pop-title">ID: ${l.feature.properties.ID + 1}</h3>
-              <p class="unit-finalscore"><strong>Difference:</strong> ${(l.feature.properties.similarity).toFixed(2)}</p>
-              <p class="unit-finalscore"><strong>Final Score:</strong> ${l.feature.properties.finalValueNormal.toFixed(2)}</p>
-              <p class="unit-first-priority"><strong>${firstPropName}:</strong> ${l.feature.properties[firstProp].toFixed(2)}</p>
-              <p class="unit-second-priority"><strong>${secondPropName}:</strong> ${l.feature.properties[secondProp].toFixed(2)}</p>
-      `;
-    }).addTo(map);
-    map.colorLayer.bringToFront();
-    map.pickPointLayer.bringToFront();
-  } else {
-    const secondPropName = modelName[secondDropSim.value];
-    const thirdPropName = modelName[thirdDropSim.value];
-    map.finalSimLayer = L.geoJSON(simGeojson, rangeColorStyle).bindTooltip((l) => { // final unit box tooltip options
-      return `<p class="unit-tooltip"><strong>Difference:</strong> ${(l.feature.properties.similarity).toFixed(2)}</p>`;
-    }).bindPopup((l) => { // final unit box popup options
-      return `<h3 class="unit-pop-title">ID: ${l.feature.properties.ID + 1}</h3>
-              <p class="unit-finalscore"><strong>Difference:</strong> ${(l.feature.properties.similarity).toFixed(2)}</p>
-              <p class="unit-finalscore"><strong>Final Score:</strong> ${l.feature.properties.finalValueNormal.toFixed(2)}</p>
-              <p class="unit-first-priority"><strong>${firstPropName}:</strong> ${l.feature.properties[firstProp].toFixed(2)}</p>
-              <p class="unit-second-priority"><strong>${secondPropName}:</strong> ${l.feature.properties[secondProp].toFixed(2)}</p>
-              <p class="unit-second-priority"><strong>${thirdPropName}:</strong> ${l.feature.properties[thirdProp].toFixed(2)}</p>
-      `;
-    }).addTo(map);
-    map.colorLayer.bringToFront();
-    map.pickPointLayer.bringToFront();
-  }
+  const propNeed = modelNamesInProperties[firstDropSim.value];
+  map.finalSimLayer = L.geoJSON(simGeojson, rangeColorStyle).bindTooltip((l) => { // final unit box tooltip options
+    return `<p class="unit-tooltip"><strong>Similarity:</strong> ${(l.feature.properties.similarity).toFixed(2)}</p>`;
+  }).bindPopup((l) => { // final unit box popup options
+    return `<h3 class="unit-pop-title">ID: ${l.feature.properties.ID + 1}</h3>
+            <p class="unit-first-priority">Similarity is ${firstPropName}</p>
+            <p class="unit-finalscore">Similarity: ${(l.feature.properties.similarity).toFixed(2)}</p>
+            <p class="unit-finalscore">Absolute Value: ${(l.feature.properties[propNeed]).toFixed(2)}</p>
+    `;
+  }).addTo(map);
+  map.colorLayer.bringToFront();
+  map.pickPointLayer.bringToFront();
 
   // finish unit step and go to next step
   finishGroupButtonSim.addEventListener('click', () => {
@@ -379,40 +361,45 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
 }
 
 // use input range to get the final geojson
-function selectSimToGeojson(resolutionCollection, from, to, pointScore, propertiesNameNormal) {
-  // pick the res in the selected range
+function selectSimToGeojson(resolutionCollection, from, to, pointScore, simCalModel) {
+
+  simCalModel(resolutionCollection, pointScore);
+  console.log(resolutionCollection);
+
+    // pick the chunks in the selected range
   const groupArray = [];
   for (let i = 0; i < resolutionCollection.features.length; i++) {
-    const eachResScore = resolutionCollection.features[i].properties[propertiesNameNormal];
+    const eachResScore = resolutionCollection.features[i].properties["similarity"];
     if (eachResScore >= from && eachResScore <= to) {
       groupArray.push(resolutionCollection.features[i]);
     }
   }
 
+
   // Calculate the similarity value based on normal final value, need to normalize it to make sure it will be between 0 and 1
-  const [minFinal, maxFinal] = getMinMaxFromFeatureArray(groupArray, propertiesNameNormal);
+  const [minFinal, maxFinal] = getMinMaxFromFeatureArray(groupArray, "similarity");
   // here use power scale
   const scaleFunc = d3.scalePow([minFinal, maxFinal], [0, 1]).exponent(1);
-  const selectPointSimRefScore = scaleFunc(pointScore[0].properties[propertiesNameNormal]);
+  // const selectPointSimRefScore = scaleFunc(pointScore[0].properties["similarity"]);
 
   for (let i = 0; i < groupArray.length; i++) {
     groupArray[i].properties.ID = i; // need to update the ID
-    groupArray[i].properties.simRefScore = scaleFunc(groupArray[i].properties[propertiesNameNormal]);
-    // similarity is the absolute difference between the selected point's score and the current score
-    if (groupArray[i].properties.simRefScore !== selectPointSimRefScore) {
-      groupArray[i].properties.similarity = Math.abs(groupArray[i].properties.simRefScore - selectPointSimRefScore);
-    } else {
-      groupArray[i].properties.similarity = 1;
-    }
+    groupArray[i].properties["similarity4Color"] = scaleFunc(groupArray[i].properties["similarity"]);
+    // // similarity is the absolute difference between the selected point's score and the current score
+    // if (groupArray[i].properties.simRefScore !== selectPointSimRefScore) {
+    //   groupArray[i].properties.similarity = Math.abs(groupArray[i].properties.simRefScore - selectPointSimRefScore);
+    // } else {
+    //   groupArray[i].properties.similarity = 1;
+    // }
   }
 
-  // prepare similarity range for color later
-  const [minSim, maxSim] = getMinMaxFromFeatureArray(groupArray, 'similarity');
+  // // prepare similarity range for color later
+  // const [minSim, maxSim] = getMinMaxFromFeatureArray(groupArray, 'similarity');
 
   // create the geojson structure
   const geojsonCollection = {'type': 'FeatureCollection', 'features': groupArray};
 
-  return [geojsonCollection, minSim, maxSim];
+  return [geojsonCollection, minFinal, maxFinal];
 }
 
 
@@ -471,8 +458,8 @@ function returnToStartSim(map, coastLine) {
   finishShowModel.disabled = true;
   firstDropSim.value = '';
   // clear dynamic dropdown
-  clearDynamicDropdown('#second-priority-sim');
-  clearDynamicDropdown('#third-priority-sim');
+  // clearDynamicDropdown('#second-priority-sim');
+  // clearDynamicDropdown('#third-priority-sim');
   for (const i of dropdownAllSim) {
     i.disabled = true;
   }
