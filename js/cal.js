@@ -8,9 +8,9 @@ import {
 } from './model.js';
 
 const modelName = {
-  'cp': 'percent overlap of length of Coastal Process values',
-  'cc': 'percent overlap of area of Coastal Condition values',
-  'cm': 'percent overlap of area of Combined Model values'
+  'cp': 'Coastal Process value',
+  'cc': 'Coastal Condition value',
+  'cm': 'Combined Model value'
 };
 
 // color scale for the resolution

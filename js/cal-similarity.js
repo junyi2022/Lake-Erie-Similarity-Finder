@@ -237,21 +237,19 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
     .bindTooltip((l) => {
       return `
         <p class="unit-tooltip"><strong>Final score: </strong>${pointScore[0].properties[propertiesName].toFixed(2)}</p>
-        <p class="unit-tooltip"><strong>Normalized score: </strong>${pointScore[0].properties[propertiesNameNormal].toFixed(2)}</p>
       `;
     }).bindPopup((l) => {
       return `
         <p class="unit-tooltip">Your selected point has a final score of <strong>${pointScore[0].properties[propertiesName].toFixed(2)}</strong></p>
-        <p class="unit-tooltip">Your selected point has a Normalized score of <strong>${pointScore[0].properties[propertiesNameNormal].toFixed(2)}</strong></p>
       `;
     });
 
-  map.colorLayer.bindTooltip((l) => { 
-    return `
-      <p class="unit-tooltip"><strong>Final score: </strong>${l.feature.properties[propertiesName].toFixed(2)}</p>
-      <p class="unit-tooltip"><strong>Normalized score: </strong>${l.feature.properties[propertiesNameNormal].toFixed(2)}</p>
-    `;
-  });
+  // map.colorLayer.bindTooltip((l) => { 
+  //   return `
+  //     <p class="unit-tooltip"><strong>Final score: </strong>${l.feature.properties[propertiesName].toFixed(2)}</p>
+  //     <p class="unit-tooltip"><strong>Normalized score: </strong>${l.feature.properties[propertiesNameNormal].toFixed(2)}</p>
+  //   `;
+  // });
 
   // process to the following step if user click next
   finishShowModel.addEventListener('click', () => {
@@ -333,8 +331,7 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
     return `<p class="unit-tooltip"><strong>Similarity:</strong> ${(l.feature.properties.similarity).toFixed(2)}</p>`;
   }).bindPopup((l) => { // final unit box popup options
     return `<h3 class="unit-pop-title">ID: ${l.feature.properties.ID + 1}</h3>
-            <p class="unit-first-priority">Similarity is ${firstPropName}</p>
-            <p class="unit-finalscore">Similarity: ${(l.feature.properties.similarity).toFixed(2)}</p>
+            <p class="unit-first-priority">Similarity percentage of <em>${firstPropName}</em> to chosen point is <strong>${(l.feature.properties.similarity).toFixed(2)}</strong></p>
             <p class="unit-finalscore">Absolute Value: ${(l.feature.properties[propNeed]).toFixed(2)}</p>
     `;
   }).addTo(map);
@@ -354,11 +351,15 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
     });
   });
 
-  // download button handeler
-  downloadButtonSim.addEventListener('click', () => {
-    handleDownload(simGeojson, fileTypeSelectSim, shpOptionsSim, 'similarity');
-  });
+  window.map = map;
 }
+
+// in order to prevent downloading duplicates, the download even listener is outside the whole function to only download once
+// download button handeler
+downloadButtonSim.addEventListener('click', () => {  
+  const geojsonData = window.map.finalSimLayer.toGeoJSON();
+  handleDownload(geojsonData, fileTypeSelectSim, shpOptionsSim, 'similarity');
+});
 
 // use input range to get the final geojson
 function selectSimToGeojson(resolutionCollection, from, to, pointScore, simCalModel) {
