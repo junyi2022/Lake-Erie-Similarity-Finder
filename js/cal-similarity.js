@@ -423,8 +423,8 @@ function returnToGenerateResSim(map) {
     i.disabled = false;
   }
   // disable slider buttons
-  fromSliderSim.value = 0.1;
-  toSliderSim.value = 0.4;
+  fromSliderSim.value = 0.8;
+  toSliderSim.value = 1;
   fromSliderSim.disabled = true;
   toSliderSim.disabled = true;
   fromInputSim.disabled = true;
@@ -443,9 +443,7 @@ function returnToGenerateResSim(map) {
     legendContent.removeChild(oldLegend);
   }
   // remove marker on slider
-  const scoreMarker = document.querySelector('.select-point-box');
   const scoreLabel = document.querySelector('.select-point-box-label');
-  scoreMarker.classList.add('hidden');
   scoreLabel.style.removeProperty('display');
   scoreLabel.classList.add('hidden');
 }

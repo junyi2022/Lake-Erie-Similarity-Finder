@@ -131,7 +131,7 @@
 .sliders_control {
   position: relative;
   height: 20px;
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
 .form_control {
@@ -211,8 +211,6 @@ input[type="range"] {
 
 .select-point-box-label {
   font-size: 12px;
-  position: relative;
-  top: -36px;
   width: fit-content;
   height: 16px;
   padding: 2px 5px;
