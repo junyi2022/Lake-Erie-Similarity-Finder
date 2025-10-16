@@ -30,6 +30,8 @@ const sendimentBudget = await readJSON('data/sediment-budget-rrbh.geojson');
 
 const coastalProcessing = await readJSON('data/models/coastal-processing.geojson');
 
+const coastalCondition = await readJSON('data/models/coastal-conditions.geojson');
+
 // reference layers
 
 window.censusTracts = censusTracts;
@@ -42,6 +44,7 @@ window.huc12 = huc12;
 window.sendimentBudget = sendimentBudget;
 window.shorelineBase = shorelineBase;
 window.coastalProcessing = coastalProcessing;
+window.coastalCondition = coastalCondition;
 
 // map for unit generator
 // Other maps shouldn't be called here since they are not shown up at the beginning and have display = none
@@ -52,6 +55,5 @@ handleMenuBar();
 
 export {
   censusTracts, dataBoundary, huc10, huc12, shorelineBase, county,
-  sendimentBudget,
-  coastalProcessing
+  sendimentBudget
 };

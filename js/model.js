@@ -10,9 +10,13 @@ function coastalProcessCal(coastalProcessing, propertiesName) {
   }
 }
 
-// function coastalConditionCal(unit) {
-    
-// }
+function coastalConditionCal(coastalCondition, propertiesName) {
+  for (let i = 0; i < coastalCondition.features.length; i++) {
+    const slope = coastalCondition.features[i].properties.CalSlope;
+    const landcover = coastalCondition.features[i].properties.CalLandcover;
+    const shoreTyoe = coastalCondition.features[i].properties.CalShoreType;
+  }
+}
 
 // function combinedModelCal(unit) {
 
@@ -34,9 +38,14 @@ function coastalProcessSim(resolutionCollection, pointScore) {
   }
 }
 
+function coastalConditionSim(resolutionCollection, pointScore) {
+    
+}
+
 export {
   coastalProcessCal,
-  coastalProcessSim
-//   coastalConditionCal,
+  coastalProcessSim,
+  coastalConditionCal,
+  coastalConditionSim,
 //   combinedModelCal
 };
