@@ -16,10 +16,9 @@ function coastalConditionCal(coastalCondition, propertiesName) {
     const landcover = coastalCondition.features[i].properties.CalLandcover;
     const shoreType = coastalCondition.features[i].properties.CalShoreType;
     const combineArray = [slope, landcover, shoreType];
-    const combinePolygon = convertToXY(combineArray); // array of array of coordinates
+
+    const [combinePolygon, area] = arrayToArea(combineArray);
     coastalCondition.features[i].properties["polygonCoords"] = combinePolygon;
-    // area calculation using martinez polygon clipping library
-    const area = polygonArea(combinePolygon[0]);
     coastalCondition.features[i].properties[propertiesName] = area;
   }
 }
@@ -45,7 +44,27 @@ function coastalProcessSim(resolutionCollection, pointScore) {
 }
 
 function coastalConditionSim(resolutionCollection, pointScore) {
+  // selected point's values
+  const pointSlope = pointScore[0].properties.CalSlope;
+  const pointLandcover = pointScore[0].properties.CalLandcover;
+  const pointShoreType = pointScore[0].properties.CalShoreType;
+  const pointCombineArray = [pointSlope, pointLandcover, pointShoreType];
+  const pointPolygon = convertToXY(pointCombineArray); // array of array of coordinates
+  for (let i = 0; i < resolutionCollection.features.length; i++) {
+    const thisPolygon = resolutionCollection.features[i].properties.polygonCoords;
     
+    // similarity calculation using polygon overlap / polygon union method
+    const intersection = martinez.intersection(pointPolygon, thisPolygon);
+    const intersectionArea = polygonArea(intersection);
+    // Calculate union using martinez library
+    const union = martinez.union(pointPolygon, thisPolygon);
+    const unionArea = polygonArea(union);
+
+    console.log('intersectionArea:', intersectionArea);
+    console.log('unionArea:', unionArea);
+
+    coastalCondition.features[i].properties["similarity"] = intersectionArea / unionArea;
+  }
 }
 
 
@@ -72,6 +91,12 @@ function polygonArea(points) {
     area += x1 * y2 - x2 * y1;
   }
   return Math.abs(area) / 2;
+}
+
+function arrayToArea(arr) {
+  const combinePolygon = convertToXY(arr); // array of array of coordinates
+  const area = polygonArea(combinePolygon[0]);
+  return [combinePolygon, area];
 }
 
 export {

@@ -273,7 +273,7 @@ function simGroupRes(map, resolutionCollection, firstDropSim, pointScore, proper
   firstDropSim.disabled = true;
 
   // add selected point's score to range bar
-  displaySelectPointScoreOnRange(pointScore[0].properties[propertiesNameNormal].toFixed(2));
+  displaySelectPointScoreOnRange(pointScore[0].properties[propertiesNameNormal.replace(/Normal$/, '')].toFixed(2));
 
   // handle return to priority step
   returnShowModelButton.addEventListener('click', () => {
