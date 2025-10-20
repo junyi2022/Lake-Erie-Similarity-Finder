@@ -5,17 +5,19 @@
     justify-content: center;
     background-color: rgba(174, 196, 174, 0.2);
     position: absolute;
-    height: 75vh;
+    height: 85vh;
     width: 100vw;
     top: 50%;
     left: 50%;
-    margin-top: -37.5vh;
+    margin-top: -42.5vh;
     margin-left: -50vw;
 }
 
 .cover-title {
     color: rgb(66, 80, 73);
     font-size: 35px;
+    margin-top: 10px;
+    margin-bottom: 13px;
 }
 
 .cover-subtitle {
@@ -29,8 +31,9 @@
 .cover-lab,
 .cover-description {
     color: rgb(74, 73, 75);
-    margin-top: 15px;
-    font-size: 15px;
+    margin-top: 12px;
+    margin-bottom: 5px;
+    font-size: 13px;
 }
 
 .cover-description {
