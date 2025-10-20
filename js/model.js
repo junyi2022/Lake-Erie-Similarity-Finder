@@ -1,5 +1,5 @@
 /* globals turf */
-import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
+import * as martinez from  "https://esm.sh/martinez-polygon-clipping";
 
 // calculate coastal processing length
 function coastalProcessCal(coastalProcessing, propertiesName) {
@@ -60,6 +60,8 @@ function coastalConditionSim(resolutionCollection, pointScore) {
     const union = martinez.union(pointPolygon, thisPolygon);
     const unionArea = polygonArea(union);
 
+    console.log(pointPolygon);
+    console.log(thisPolygon);
     console.log('intersectionArea:', intersectionArea);
     console.log('unionArea:', unionArea);
 
