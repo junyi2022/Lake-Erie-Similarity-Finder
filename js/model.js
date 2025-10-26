@@ -1,5 +1,4 @@
-/* globals turf */
-import * as martinez from  "https://esm.sh/martinez-polygon-clipping";
+/* globals turf, martinez */
 
 // calculate coastal processing length
 function coastalProcessCal(coastalProcessing, propertiesName) {
@@ -55,15 +54,10 @@ function coastalConditionSim(resolutionCollection, pointScore) {
     
     // similarity calculation using polygon overlap / polygon union method
     const intersection = martinez.intersection(pointPolygon, thisPolygon);
-    const intersectionArea = polygonArea(intersection);
+    const intersectionArea = multiPolygonArea(intersection);
     // Calculate union using martinez library
     const union = martinez.union(pointPolygon, thisPolygon);
-    const unionArea = polygonArea(union);
-
-    console.log(pointPolygon);
-    console.log(thisPolygon);
-    console.log('intersectionArea:', intersectionArea);
-    console.log('unionArea:', unionArea);
+    const unionArea = multiPolygonArea(union);
 
     coastalCondition.features[i].properties["similarity"] = intersectionArea / unionArea;
   }
@@ -93,6 +87,17 @@ function polygonArea(points) {
     area += x1 * y2 - x2 * y1;
   }
   return Math.abs(area) / 2;
+}
+
+function multiPolygonArea(mp) {
+  let total = 0;
+  if (!mp) return 0;
+  for (const poly of mp) {
+    for (const ring of poly) {
+      total += polygonArea(ring);
+    }
+  }
+  return total;
 }
 
 function arrayToArea(arr) {

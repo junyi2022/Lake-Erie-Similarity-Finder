@@ -18,7 +18,7 @@
         <link rel="stylesheet" href="css/toolbar-style.css">
         <link rel="stylesheet" href="css/decoration-style.css">
         <link rel="stylesheet" href="css/documentation-style.css">
-
+        
         <!-- add favicon -->
         <link rel="shortcurt icon" href="https://junyi2022.github.io/Lake-Erie-Coastal-Unit-Explorer/favicon.ico" type="image/x-icon">
 
@@ -199,8 +199,8 @@
                             <div class="range_container">
                                 <div class="select-point-box-label hidden"></div>
                                 <div class="sliders_control">
-                                    <input id="fromSlider" type="range" value="0.8" min="0" max="1" step="0.1" disabled="true"/>
-                                    <input id="toSlider" type="range" value="1" min="0" max="1" step="0.1" disabled="true"/>
+                                    <input id="fromSlider" type="range" value="0.8" min="0" max="1" step="0.01" disabled="true"/>
+                                    <input id="toSlider" type="range" value="1" min="0" max="1" step="0.01" disabled="true"/>
                                     
                                 </div>
                                 <div class="form_control">
@@ -1103,7 +1103,7 @@
 
         <footer class="footer">
             <p id="footnote">
-                <strong>University of Pennsylvania</strong> <a href="https://emlabupenn.com/" target="_blank"><strong>EMLab</strong></a> Last update: September 2025.
+                <strong>University of Pennsylvania</strong> <a href="https://emlabupenn.com/" target="_blank"><strong>EMLab</strong></a> Last update: October 2025.
             </p>
         </footer>
 
@@ -1114,7 +1114,7 @@
         <!-- add TURF library -->
         <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
         <!-- add polygon calculation library -->
-        <script src="https://cdn.jsdelivr.net/npm/martinez-polygon-clipping@0.7.1/dist/martinez.min.js"></script>
+        <script src='https://unpkg.com/martinez-polygon-clipping@0.7.1/dist/martinez.min.js'></script>
         <!-- add shapefile write-->
         <script src="lib/shpwrite.js"></script>
         <!-- link js file -->
