@@ -3,7 +3,7 @@ import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
 import { legend1Style, legend3Style } from './map.js';
 import {coastalProcessCal, coastalProcessSim, coastalConditionCal, coastalConditionSim } from './model.js';
-import { withSpinnerDo, displaySelectPointScoreOnRange, getParsed } from './logistics.js';
+import { withSpinnerDo, displaySelectPointScoreOnRange, getParsed, fillSlider, updatePercentageDisplay } from './logistics.js';
 import { modelName, colorScale, unitColorScale, getMinMaxFromFeatureArray, handleDownload, clearDynamicDropdown } from './cal.js';
 import { initializePoints, handleMarkerSnap, getFtResolution } from './cal.js';
 
@@ -25,6 +25,7 @@ const fromSliderSim = document.querySelector('#fromSlider');
 const toSliderSim = document.querySelector('#toSlider');
 const fromInputSim = document.querySelector('#fromInput');
 const toInputSim = document.querySelector('#toInput');
+const percentageDisplay = document.querySelector('#percentageDisplay');
 const generateGroupButtonSim = document.querySelector('.generate-group-sim');
 const finishGroupButtonSim = document.querySelector('.finish-group-sim');
 const returnGenerateGroupButtonSim = document.querySelector('.return-generate-group-sim');
@@ -308,7 +309,9 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
 
 
   // get range input values
-  const [from, to] = getParsed(fromSliderSim, toSliderSim);
+  var [from, to] = getParsed(fromSliderSim, toSliderSim);
+  from = from / 100;
+  to = to / 100;
 
   // // check if the range is valid
   // if (scoreValueNum < from || scoreValueNum > to) {
@@ -423,8 +426,15 @@ function returnToGenerateResSim(map) {
     i.disabled = false;
   }
   // disable slider buttons
-  fromSliderSim.value = 0.8;
-  toSliderSim.value = 1;
+
+  // return slider to default values
+  fromSliderSim.value = 80;
+  toSliderSim.value = 100;
+  fromInputSim.value = 80;
+  toInputSim.value = 100;
+  fillSlider(fromSliderSim, toSliderSim, '#C6C6C6', '#c1e2ff', toSliderSim);
+  percentageDisplay.textContent = `${fromSliderSim.value}% - ${toSliderSim.value}%`;
+  
   fromSliderSim.disabled = true;
   toSliderSim.disabled = true;
   fromInputSim.disabled = true;

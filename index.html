@@ -195,22 +195,24 @@
                         </div>
                         
                         <div class="substep">
-                            <h5 class="substep-title">Range of search</h5>
+                            <h5 class="substep-title">Percentage Similarity Range</h5>
                             <div class="range_container">
                                 <div class="select-point-box-label hidden"></div>
                                 <div class="sliders_control">
-                                    <input id="fromSlider" type="range" value="0.8" min="0" max="1" step="0.01" disabled="true"/>
-                                    <input id="toSlider" type="range" value="1" min="0" max="1" step="0.01" disabled="true"/>
-                                    
+                                    <input id="fromSlider" type="range" value="80" min="0" max="100" step="1"/>
+                                    <input id="toSlider" type="range" value="100" min="0" max="100" step="1"/>
                                 </div>
+                                <div class="percentage-display" id="percentageDisplay">80% - 100%</div>
                                 <div class="form_control">
                                     <div class="form_control_container">
                                         <div class="form_control_container_time">Min</div>
-                                        <input class="form_control_container_time_input" type="number" id="fromInput" value="0.8" min="0" max="1" step="0.1" disabled="true"/>
+                                        <input class="form_control_container_time_input" type="number" id="fromInput" value="80" min="0" max="100" step="1"/>
+                                        <span class="percentage-symbol">%</span>
                                     </div>
                                     <div class="form_control_container">
                                         <div class="form_control_container_time">Max</div>
-                                        <input class="form_control_container_time_input" type="number" id="toInput" value="1" min="0" max="1" step="0.1" disabled="true"/>
+                                        <input class="form_control_container_time_input" type="number" id="toInput" value="100" min="0" max="100" step="1"/>
+                                        <span class="percentage-symbol">%</span>
                                     </div>
                                 </div>
                             </div>
