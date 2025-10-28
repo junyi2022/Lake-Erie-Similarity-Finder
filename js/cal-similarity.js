@@ -262,9 +262,9 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
 function simGroupRes(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal, simCalModel, modelNamesInProperties) {
   // enable step 3 box
   fromSliderSim.disabled = false;
-  toSliderSim.disabled = false;
+  // toSliderSim.disabled = false;
   fromInputSim.disabled = false;
-  toInputSim.disabled = false;
+  // toInputSim.disabled = false;
   generateGroupButtonSim.disabled = false;
   finishGroupButtonSim.disabled = false;
 
@@ -368,9 +368,8 @@ downloadButtonSim.addEventListener('click', () => {
 function selectSimToGeojson(resolutionCollection, from, to, pointScore, simCalModel) {
 
   simCalModel(resolutionCollection, pointScore);
-  console.log(resolutionCollection);
 
-    // pick the chunks in the selected range
+  // pick the chunks in the selected range
   const groupArray = [];
   for (let i = 0; i < resolutionCollection.features.length; i++) {
     const eachResScore = resolutionCollection.features[i].properties["similarity"];
@@ -413,9 +412,9 @@ function returnToSliderGroup() {
   fileTypeSelectSim.disabled = true;
   downloadButtonSim.disabled = true;
   fromSliderSim.disabled = false;
-  toSliderSim.disabled = false;
+  // toSliderSim.disabled = false;
   fromInputSim.disabled = false;
-  toInputSim.disabled = false;
+  // toInputSim.disabled = false;
 }
 
 function returnToGenerateResSim(map) {
