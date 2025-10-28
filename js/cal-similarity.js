@@ -40,7 +40,7 @@ const reversedUnitColorScale = (t) => unitColorScale(1 - t);
 // range color style
 const rangeColorStyle = {
   stroke: true,
-  color: '#FFCF4D',
+  color: 'rgba(255, 113, 77, 1)',
   weight: 20,
   opacity: 0.8,
   lineCap: 'butt',
