@@ -3,9 +3,9 @@
 // calculate coastal processing length
 function coastalProcessCal(coastalProcessing, propertiesName) {
   for (let i = 0; i < coastalProcessing.features.length; i++) {
-      const sedimentNetLoss = coastalProcessing.features[i].properties.CalSedi;
-      const retreatRate = coastalProcessing.features[i].properties.CalRetreat;
-      coastalProcessing.features[i].properties[propertiesName] = sedimentNetLoss + retreatRate;
+    const sedimentNetLoss = coastalProcessing.features[i].properties.CalSedi;
+    const retreatRate = coastalProcessing.features[i].properties.CalRetreat;
+    coastalProcessing.features[i].properties[propertiesName] = sedimentNetLoss + retreatRate;
   }
 }
 
@@ -22,9 +22,20 @@ function coastalConditionCal(coastalCondition, propertiesName) {
   }
 }
 
-// function combinedModelCal(unit) {
+function combinedModelCal(conditionProcessingCombine, propertiesName) {
+    for (let i = 0; i < conditionProcessingCombine.features.length; i++) {
+    const slope = conditionProcessingCombine.features[i].properties.CalSlope;
+    const landcover = conditionProcessingCombine.features[i].properties.CalLandcov;
+    const shoreType = conditionProcessingCombine.features[i].properties.CalShoreTy;
+    const sedimentNetLoss = conditionProcessingCombine.features[i].properties.CalSedi;
+    const retreatRate = conditionProcessingCombine.features[i].properties.CalRetreat;
+    const combineArray = [slope, landcover, shoreType, sedimentNetLoss, retreatRate];
 
-// }
+    const [combinePolygon, area] = arrayToArea(combineArray);
+    conditionProcessingCombine.features[i].properties["polygonCoords"] = combinePolygon;
+    conditionProcessingCombine.features[i].properties[propertiesName] = area;
+  }
+}
 
 // calculate similarity within model
 
@@ -63,18 +74,56 @@ function coastalConditionSim(resolutionCollection, pointScore) {
   }
 }
 
+function combinedModelSim(resolutionCollection, pointScore) {
+  // selected point's values
+  const pointSlope = pointScore[0].properties.CalSlope;
+  const pointLandcover = pointScore[0].properties.CalLandcover;
+  const pointShoreType = pointScore[0].properties.CalShoreType;
+  const pointSedimentNetLoss = pointScore[0].properties.CalSedi;
+  const pointRetreatRate = pointScore[0].properties.CalRetreat;
+
+  const pointCombineArray = [pointSlope, pointLandcover, pointShoreType, pointSedimentNetLoss, pointRetreatRate];
+  const pointPolygon = convertToXY(pointCombineArray); // array of array of coordinates
+  for (let i = 0; i < resolutionCollection.features.length; i++) {
+    const thisPolygon = resolutionCollection.features[i].properties.polygonCoords;
+    
+    // similarity calculation using polygon overlap / polygon union method
+    const intersection = martinez.intersection(pointPolygon, thisPolygon);
+    const intersectionArea = multiPolygonArea(intersection);
+
+    // console.log(thisPolygon);
+    // console.log("pointPolygon:", pointPolygon);
+    // console.log("intersection:", intersection);    
+    // console.log("intersectionArea:", intersectionArea);
+    // Calculate union using martinez library
+    const union = martinez.union(pointPolygon, thisPolygon);
+    const unionArea = multiPolygonArea(union);
+
+    // console.log("union:", union);
+    // console.log("unionArea:", unionArea);
+
+    conditionProcessingCombine.features[i].properties["similarity"] = intersectionArea;
+  }
+}
+
 
 // supporting functions
 // Convert radius array to Cartesian coordinates
 function convertToXY(radii) {
   const n = radii.length;
   const coords = [];
+
+  // Normalize radii to a reasonable scale (0.1 to 1.0)
+  const maxRadius = Math.max(...radii);
+  const scaleFactor = 1.0 / maxRadius;
+
   for (let i = 0; i < n; i++) {
     const theta = (2 * Math.PI * i) / n - Math.PI/2;
-    const r = radii[i];
-    coords.push([r * Math.cos(theta), r * Math.sin(theta)]);
+    const r = radii[i] * scaleFactor;
+    coords.push([Number(r * Math.cos(theta)), Number(r * Math.sin(theta))]);
   }
-  coords.push(coords[0]); // close the polygon
+  // Close the polygon
+  coords.push([coords[0][0], coords[0][1]]);
   return [coords];
 }
 
@@ -111,5 +160,6 @@ export {
   coastalProcessSim,
   coastalConditionCal,
   coastalConditionSim,
-//   combinedModelCal
+  combinedModelCal,
+  combinedModelSim
 };

@@ -32,6 +32,8 @@ const coastalProcessing = await readJSON('data/models/coastal-processing.geojson
 
 const coastalCondition = await readJSON('data/models/coastal-conditions.geojson');
 
+const conditionProcessingCombine = await readJSON('data/models/condition-processing-combine.geojson');
+
 // reference layers
 
 window.censusTracts = censusTracts;
@@ -45,6 +47,7 @@ window.sendimentBudget = sendimentBudget;
 window.shorelineBase = shorelineBase;
 window.coastalProcessing = coastalProcessing;
 window.coastalCondition = coastalCondition;
+window.conditionProcessingCombine = conditionProcessingCombine;
 
 // map for unit generator
 // Other maps shouldn't be called here since they are not shown up at the beginning and have display = none

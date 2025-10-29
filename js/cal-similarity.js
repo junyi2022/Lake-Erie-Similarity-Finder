@@ -2,7 +2,7 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
 import { legend1Style, legend3Style } from './map.js';
-import {coastalProcessCal, coastalProcessSim, coastalConditionCal, coastalConditionSim } from './model.js';
+import {coastalProcessCal, coastalProcessSim, coastalConditionCal, coastalConditionSim, combinedModelCal, combinedModelSim } from './model.js';
 import { withSpinnerDo, displaySelectPointScoreOnRange, getParsed, fillSlider, updatePercentageDisplay } from './logistics.js';
 import { modelName, colorScale, unitColorScale, getMinMaxFromFeatureArray, handleDownload, clearDynamicDropdown } from './cal.js';
 import { initializePoints, handleMarkerSnap, getFtResolution } from './cal.js';
@@ -146,27 +146,27 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
   const modelSelect = {
   'cp': window.coastalProcessing,
   'cc': window.coastalCondition,
-  // 'cm': 'valueCombinedModel'
+  'cm': window.conditionProcessingCombine,
   };
 
   // list all the dropdown's avaliable models and associated properties
   const modelFuncs = {
     'cp': coastalProcessCal,
     'cc': coastalConditionCal,
-    // 'cm': combinedModelCal
+    'cm': combinedModelCal
   };
 
   // name in properties for each model
   const modelNamesInProperties = {
     'cp': 'cpLength',
     'cc': 'ccArea',
-    // 'cm': 'cmValue'
+    'cm': 'cmArea'
   };
 
   const modelSimFuncs = {
     'cp': coastalProcessSim,
     'cc': coastalConditionSim,
-    // 'cm': combinedModelSim
+    'cm': combinedModelSim
   }
 
   // zoom to the whole coastline
