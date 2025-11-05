@@ -81,3 +81,11 @@ section.leaflet-control-layers-list:before {
     fill: brown;
     stroke: brown;
 }
+
+/* style of canvas of popup */
+
+.canvas {
+    width: 300px;
+    height: 300px;
+    border: 1px solid #ccc;
+}

@@ -76,14 +76,8 @@ function coastalConditionSim(resolutionCollection, pointScore) {
 
 function combinedModelSim(resolutionCollection, pointScore) {
   // selected point's values
-  const pointSlope = pointScore[0].properties.CalSlope;
-  const pointLandcover = pointScore[0].properties.CalLandcover;
-  const pointShoreType = pointScore[0].properties.CalShoreType;
-  const pointSedimentNetLoss = pointScore[0].properties.CalSedi;
-  const pointRetreatRate = pointScore[0].properties.CalRetreat;
+  const pointPolygon = pointScore[0].properties.polygonCoords;
 
-  const pointCombineArray = [pointSlope, pointLandcover, pointShoreType, pointSedimentNetLoss, pointRetreatRate];
-  const pointPolygon = convertToXY(pointCombineArray); // array of array of coordinates
   for (let i = 0; i < resolutionCollection.features.length; i++) {
     const thisPolygon = resolutionCollection.features[i].properties.polygonCoords;
     
@@ -91,18 +85,11 @@ function combinedModelSim(resolutionCollection, pointScore) {
     const intersection = martinez.intersection(pointPolygon, thisPolygon);
     const intersectionArea = multiPolygonArea(intersection);
 
-    // console.log(thisPolygon);
-    // console.log("pointPolygon:", pointPolygon);
-    // console.log("intersection:", intersection);    
-    // console.log("intersectionArea:", intersectionArea);
     // Calculate union using martinez library
     const union = martinez.union(pointPolygon, thisPolygon);
     const unionArea = multiPolygonArea(union);
 
-    // console.log("union:", union);
-    // console.log("unionArea:", unionArea);
-
-    conditionProcessingCombine.features[i].properties["similarity"] = intersectionArea;
+    conditionProcessingCombine.features[i].properties["similarity"] = intersectionArea / unionArea;
   }
 }
 

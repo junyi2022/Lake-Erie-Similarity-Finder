@@ -229,7 +229,7 @@ function legend3Style(map, colorScale, min, max) {
   similarityColorLegendDiv.innerHTML = `
     <strong><p>Similarity</p></strong>
     <div class="colorTextPair">
-    <div class="catColorBox" style="background-color: rgba(255, 113, 77, 0.8)"></div>
+    <div class="catColorBox" style="background-color: rgba(223, 46, 2, 0.8)"></div>
     <p class="catText">Coastline within Selected Range</p>
     </div>
   `;

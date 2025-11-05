@@ -40,7 +40,7 @@ const reversedUnitColorScale = (t) => unitColorScale(1 - t);
 // range color style
 const rangeColorStyle = {
   stroke: true,
-  color: 'rgba(255, 113, 77, 1)',
+  color: 'rgba(223, 46, 2, 1)',
   weight: 20,
   opacity: 0.8,
   lineCap: 'butt',
@@ -322,6 +322,7 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
   // calculate similarity based on selected model
   const [simGeojson, minSim, maxSim] = selectSimToGeojson(resolutionCollection, from, to, pointScore, simCalModel);
   console.log(simGeojson);
+  console.log(pointScore);
 
   // add unit legend
   legend3Style(map, reversedUnitColorScale, minSim, maxSim);
@@ -331,13 +332,141 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
   const firstPropName = modelName[firstDropSim.value];
   const propNeed = modelNamesInProperties[firstDropSim.value];
   map.finalSimLayer = L.geoJSON(simGeojson, rangeColorStyle).bindTooltip((l) => { // final unit box tooltip options
-    return `<p class="unit-tooltip"><strong>Similarity:</strong> ${(l.feature.properties.similarity).toFixed(2)}</p>`;
-  }).bindPopup((l) => { // final unit box popup options
+    return `<p class="unit-tooltip"><strong>Similarity:</strong> ${(l.feature.properties.similarity).toFixed(3) * 100} %</p>`;
+  }).bindPopup((l) => { 
+    // Generate unique ID for the canvas to avoid conflicts
+    const canvasId = `radar-canvas-${l.feature.properties.ID}`;
+    
     return `<h3 class="unit-pop-title">ID: ${l.feature.properties.ID + 1}</h3>
-            <p class="unit-first-priority">Similarity percentage of <em>${firstPropName}</em> to chosen point is <strong>${(l.feature.properties.similarity).toFixed(2)}</strong></p>
-            <p class="unit-finalscore">Absolute Value: ${(l.feature.properties[propNeed]).toFixed(2)}</p>
+            <p class="unit-first-priority">Similarity percentage of <em>${firstPropName}</em> to chosen point is <strong>${(l.feature.properties.similarity).toFixed(3) * 100}</strong> %</p>
+            <p class="unit-finalscore">Absolute Value: ${(l.feature.properties[propNeed]).toFixed(4)}</p>
+            <canvas class="canvas" id="${canvasId}"></canvas>
     `;
   }).addTo(map);
+
+map.finalSimLayer.on("popupopen", (e) => {
+  const canvas = e.popup._contentNode.querySelector(".canvas");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const size = 300;
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = `${size}px`;
+  canvas.style.height = `${size}px`;
+  ctx.scale(dpr, dpr);
+
+  ctx.clearRect(0, 0, size, size);
+  ctx.save();
+  ctx.translate(size / 2, size / 2);
+
+  console.log(firstDropSim.value);
+  // --- extract feature data --- //
+  const f = e.layer.feature.properties;
+  const slope = f.CalSlope;
+  const landcover = f.CalLandcov;
+  const shoreType = f.CalShoreTy;
+  const sedimentNetLoss = f.CalSedi;
+  const retreatRate = f.CalRetreat;
+
+  // combine them into an array for radar chart
+  const combineArray = [slope, landcover, shoreType, sedimentNetLoss, retreatRate];
+
+  // define corresponding axis names
+  const axisNames = ["Slope", "Landcover", "Shore Type", "Sediment Loss", "Retreat Rate"];
+
+
+  // --- draw a test radar shape --- //
+  const MAX_SCALE = 4;
+  const n = combineArray.length;
+
+  // helper: convert to XY
+  const coords = [];
+  for (let i = 0; i < n; i++) {
+    const theta = (2 * Math.PI * i) / n - Math.PI / 2;
+    coords.push([
+      combineArray[i] * Math.cos(theta),
+      combineArray[i] * Math.sin(theta)
+    ]);
+  }
+  coords.push(coords[0]); // close shape
+
+  // --- scale to fit canvas --- //
+  const scale = (size / 2 - 40) / MAX_SCALE;
+  ctx.scale(scale, -scale);
+
+  // --- draw axes --- //
+  ctx.strokeStyle = "#ccc";
+  ctx.lineWidth = 0.02;
+  for (let i = 0; i < n; i++) {
+    const theta = (2 * Math.PI * i) / n - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(MAX_SCALE * Math.cos(theta), MAX_SCALE * Math.sin(theta));
+    ctx.stroke();
+
+    // draw axis label
+    const nameX = (MAX_SCALE + 0.3) * Math.cos(theta);
+    const nameY = (MAX_SCALE + 0.3) * Math.sin(theta);
+    ctx.save();
+    ctx.scale(1, -1);
+    ctx.fillStyle = "#000";
+    ctx.font = "0.035em Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(axisNames[i], nameX, -nameY);
+    ctx.restore();
+  }
+
+  // --- 2️⃣ Second polygon: from pointScore --- //
+  // assume pointScore is globally accessible or you can pass it in
+  const psFeature = pointScore[0]; // example: first point
+  const slope2 = psFeature.properties.CalSlope;
+  const landcover2 = psFeature.properties.CalLandcov;
+  const shoreType2 = psFeature.properties.CalShoreTy;
+  const sedimentNetLoss2 = psFeature.properties.CalSedi;
+  const retreatRate2 = psFeature.properties.CalRetreat;
+
+  const combineArray2 = [slope2, landcover2, shoreType2, sedimentNetLoss2, retreatRate2];
+
+  const coords2 = [];
+  for (let i = 0; i < combineArray2.length; i++) {
+    const theta = (2 * Math.PI * i) / combineArray2.length - Math.PI / 2;
+    coords2.push([
+      combineArray2[i] * Math.cos(theta),
+      combineArray2[i] * Math.sin(theta)
+    ]);
+  }
+  coords2.push(coords2[0]);
+
+  // --- draw first polygon --- //
+  ctx.beginPath();
+  ctx.moveTo(coords[0][0], coords[0][1]);
+  for (let i = 1; i < coords.length; i++) {
+    ctx.lineTo(coords[i][0], coords[i][1]);
+  }
+  ctx.closePath();
+  ctx.strokeStyle = "#0077ff";
+  ctx.lineWidth = 0.05;
+  ctx.stroke();
+  ctx.fillStyle = "rgba(0, 119, 255, 0.25)";
+  ctx.fill();
+
+  // draw second polygon
+  ctx.beginPath();
+  ctx.moveTo(coords2[0][0], coords2[0][1]);
+  for (let i = 1; i < coords2.length; i++) ctx.lineTo(coords2[i][0], coords2[i][1]);
+  ctx.closePath();
+  ctx.strokeStyle = "#ff6600";
+  ctx.lineWidth = 0.05;
+  ctx.stroke();
+  ctx.fillStyle = "rgba(255, 102, 0, 0.25)";
+  ctx.fill();
+
+  ctx.restore();
+});
+
   map.colorLayer.bringToFront();
   map.pickPointLayer.bringToFront();
 
