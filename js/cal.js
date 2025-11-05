@@ -1,12 +1,6 @@
 /* globals turf, shpwrite */
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
-import { 
-  coastalProcessCal, 
-  // coastalConditionCal, 
-  // combinedModelCal 
-} from './model.js';
-
 const modelName = {
   'cp': 'Coastal Process value',
   'cc': 'Coastal Condition value',
@@ -43,9 +37,6 @@ const shpOptions = {
   },
 };
 
-
-// step 1 supporting functions
-
 // add start and end marker to the end of the shoreline
 function initializePoints(map, point, icon) {
   const pointMarker = L.marker([point[1], point[0]], {
@@ -54,10 +45,6 @@ function initializePoints(map, point, icon) {
   }).addTo(map.markerLayer);
   return pointMarker;
 }
-
-// function reinitializePoints(marker, point) {
-//   marker.setLatLng([point.geometry.coordinates[1], point.geometry.coordinates[0]]);
-// }
 
 // snap the maker to the nearest point on the coastal line after user drag markers
 function handleMarkerSnap(coastLine, marker, map) {
@@ -70,19 +57,6 @@ function handleMarkerSnap(coastLine, marker, map) {
   marker.setLatLng([snappedPoint.geometry.coordinates[1], snappedPoint.geometry.coordinates[0]]); // reset the location of the marker
 }
 
-
-// step for resolution functions
-
-// step for resolution botton manipulation part
-
-
-
-// step for resolution calculation part
-
-
-// step for resolution supporting functions
-
-
 // get min max from feature array
 function getMinMaxFromFeatureArray(featureArray, prop) {
   // The final value now may be skewed, need to normalize it to make sure it will be between 0 and 1
@@ -94,35 +68,6 @@ function getMinMaxFromFeatureArray(featureArray, prop) {
 
   return [min, max];
 }
-
-// divide the slice into certain length
-
-function getFtResolution(line, num) { // num is ft
-  // use 3000ft res for all inputs
-  const resolutionCal = num * 0.0003048; // ft to km
-  const resolutionCollection = turf.lineChunk(line, resolutionCal); // unit here is km
-  return resolutionCollection;
-}
-
-
-// step for category grouping functions
-
-// step for category grouping botton manipulation part
-
-// prepare and call category grouping functions
-
-
-// step for category grouping calculation part
-
-
-// step for category grouping supporting functions
-
-
-// assign category number to final score's value
-
-
-
-// last step functions
 
 // handle download
 // need to be an async function because in the shapefile download part shpwrite.zip generate a promise, and need await for that promise to be down (similar to fetch, also a promise)
@@ -158,9 +103,7 @@ async function handleDownload(units, fileTypeSelect, shpOptions, name) {
   window.URL.revokeObjectURL(url);
 }
 
-
 // Other functions related to model calculations
-
 
 function getSimplerLineFromLine(lineString) { // returns point's coordinate arrays
   const linePoints = lineString.geometry.coordinates;
@@ -232,71 +175,6 @@ function getResolutionBoxes(Collection, num) {
 }
 
 
-// collection of return manipulations
-
-function returnToGenerateGroup() {
-  categoryBox.disabled = false;
-  generateGroupButton.disabled = false;
-  fileTypeSelect.disabled = true;
-  downloadButton.disabled = true;
-}
-
-function returnToGenerateRes(map) {
-  // disable group unit buttons
-  categoryBox.value = '';
-  categoryBox.disabled = true;
-  generateGroupButton.disabled = true;
-  finishGroupButton.disabled = true;
-  // enable res buttons
-  for (const i of dropdownAll) {
-    i.disabled = false;
-  }
-  generateResButton.disabled = false;
-  finishResButton.disabled = false;
-  // map cleanup
-  if (map.finalUnitLayer !== null) {
-    map.finalUnitLayer.clearLayers();
-  }
-  // remove unit legend
-  const legendContent = document.querySelector('.legend-content');
-  if (legendContent.querySelector('.unit-legend') !== null) {
-    const oldLegend = legendContent.querySelector('.unit-legend');
-    legendContent.removeChild(oldLegend);
-  }
-}
-
-function returnToStart(map) {
-  // enable the start buttons
-  startButton.disabled = false;
-  finishButton.disabled = false;
-  // clear the map
-  map.flyToBounds(map.zoomRefLayer.getBounds());
-  map.sliceLayer.clearLayers();
-  if (map.colorLayer !== null) {
-    map.colorLayer.clearLayers();
-  }
-  map.legend.remove();
-
-  firstDrop.value = '';
-  // clear dynamic dropdown
-  clearDynamicDropdown('#second-priority');
-  clearDynamicDropdown('#third-priority');
-  for (const i of dropdownAll) {
-    i.disabled = true;
-  }
-  generateResButton.disabled = true;
-  finishResButton.disabled = true;
-}
-
-function clearDynamicDropdown(ID) {
-  const DropBox = document.querySelector(ID);
-  if (DropBox.querySelectorAll('option') !== null) {
-    DropBox.innerHTML = '';
-  }
-}
-
-
-
 export {
   modelName,
   colorScale,
@@ -304,11 +182,9 @@ export {
   shpOptions,
   initializePoints,
   handleMarkerSnap,
-  getFtResolution,
   getResolutionBoxes,
   getMinMaxFromFeatureArray,
   handleDownload,
-  clearDynamicDropdown,
 };
 
 

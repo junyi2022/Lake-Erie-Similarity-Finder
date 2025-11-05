@@ -2,10 +2,10 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
 import { legend1Style, legend3Style } from './map.js';
-import {coastalProcessCal, coastalProcessSim, coastalConditionCal, coastalConditionSim, combinedModelCal, combinedModelSim } from './model.js';
-import { withSpinnerDo, displaySelectPointScoreOnRange, getParsed, fillSlider, updatePercentageDisplay } from './logistics.js';
-import { modelName, colorScale, unitColorScale, getMinMaxFromFeatureArray, handleDownload, clearDynamicDropdown } from './cal.js';
-import { initializePoints, handleMarkerSnap, getFtResolution } from './cal.js';
+import {coastalProcessCal, coastalProcessSim, coastalConditionCal, coastalConditionSim, combinedModelCal, combinedModelSim, combineModelPropToArray, coastalConditionPropToArray } from './model.js';
+import { withSpinnerDo, displaySelectPointScoreOnRange, getParsed, fillSlider } from './logistics.js';
+import { modelName, colorScale, unitColorScale, getMinMaxFromFeatureArray, handleDownload } from './cal.js';
+import { initializePoints, handleMarkerSnap } from './cal.js';
 
 // similar finder inputs
 // get step 1 buttons
@@ -14,8 +14,6 @@ const finishButtonSim = document.querySelector('.finish-point-sim');
 const returnStartButtonSim = document.querySelector('.return-select-point-sim');
 // get step 2 input boxes
 const firstDropSim = document.querySelector('#first-priority-sim');
-// const secondDropSim = document.querySelector('#second-priority-sim');
-// const thirdDropSim = document.querySelector('#third-priority-sim');
 const dropdownAllSim = document.getElementsByClassName('priority-sim'); // all dropdown boxes
 const showModelButton = document.querySelector('.show-model-sim');
 const finishShowModel = document.querySelector('.finish-show-model-sim');
@@ -245,13 +243,6 @@ function handleSimCalculations(midPointSelect, firstDropSim, map, coastalLine) {
       `;
     });
 
-  // map.colorLayer.bindTooltip((l) => { 
-  //   return `
-  //     <p class="unit-tooltip"><strong>Final score: </strong>${l.feature.properties[propertiesName].toFixed(2)}</p>
-  //     <p class="unit-tooltip"><strong>Normalized score: </strong>${l.feature.properties[propertiesNameNormal].toFixed(2)}</p>
-  //   `;
-  // });
-
   // process to the following step if user click next
   finishShowModel.addEventListener('click', () => {
     simGroupRes(map, resolutionCollection, firstDropSim, pointScore, propertiesNameNormal, simCalModel, modelNamesInProperties);
@@ -297,32 +288,13 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
     map.finalSimLayer.clearLayers();
   }
 
-  // // For some reasons, the selected point's score is not updated in a timely manner, so here get the score from the label on the slider.
-  // // If use the pointScore[0].properties.finalValueNormal, it will be the score of the last selected point and send the alert below twice and automatically fixed itself.
-  // const divElement = document.getElementById('select-point-box-text');
-  // // this is the normalized score
-  // const textContent = divElement.textContent;
-  // const scoreValue = textContent.replace('Selected Point: ', '').trim();
-  // const scoreValueNum = Number(scoreValue);
-
-  const scoreValueNum = pointScore[0].properties[propertiesNameNormal];
-
-
   // get range input values
   var [from, to] = getParsed(fromSliderSim, toSliderSim);
   from = from / 100;
   to = to / 100;
 
-  // // check if the range is valid
-  // if (scoreValueNum < from || scoreValueNum > to) {
-  //   alert('Please make sure the range includes the selected point\'s score.');
-  //   return;
-  // }
-
   // calculate similarity based on selected model
   const [simGeojson, minSim, maxSim] = selectSimToGeojson(resolutionCollection, from, to, pointScore, simCalModel);
-  console.log(simGeojson);
-  console.log(pointScore);
 
   // add unit legend
   legend3Style(map, reversedUnitColorScale, minSim, maxSim);
@@ -332,13 +304,13 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
   const firstPropName = modelName[firstDropSim.value];
   const propNeed = modelNamesInProperties[firstDropSim.value];
   map.finalSimLayer = L.geoJSON(simGeojson, rangeColorStyle).bindTooltip((l) => { // final unit box tooltip options
-    return `<p class="unit-tooltip"><strong>Similarity:</strong> ${(l.feature.properties.similarity).toFixed(3) * 100} %</p>`;
+    return `<p class="unit-tooltip"><strong>Similarity:</strong> ${(l.feature.properties.similarity * 100).toFixed(1) } %</p>`;
   }).bindPopup((l) => { 
     // Generate unique ID for the canvas to avoid conflicts
     const canvasId = `radar-canvas-${l.feature.properties.ID}`;
     
     return `<h3 class="unit-pop-title">ID: ${l.feature.properties.ID + 1}</h3>
-            <p class="unit-first-priority">Similarity percentage of <em>${firstPropName}</em> to chosen point is <strong>${(l.feature.properties.similarity).toFixed(3) * 100}</strong> %</p>
+            <p class="unit-first-priority">Similarity percentage of <em>${firstPropName}</em> to chosen point is <strong>${(l.feature.properties.similarity * 100).toFixed(1)}</strong> %</p>
             <p class="unit-finalscore">Absolute Value: ${(l.feature.properties[propNeed]).toFixed(4)}</p>
             <canvas class="canvas" id="${canvasId}"></canvas>
     `;
@@ -348,123 +320,107 @@ map.finalSimLayer.on("popupopen", (e) => {
   const canvas = e.popup._contentNode.querySelector(".canvas");
   if (!canvas) return;
 
-  const ctx = canvas.getContext("2d");
-  const dpr = window.devicePixelRatio || 1;
-  const size = 300;
-  canvas.width = size * dpr;
-  canvas.height = size * dpr;
-  canvas.style.width = `${size}px`;
-  canvas.style.height = `${size}px`;
-  ctx.scale(dpr, dpr);
+  const modelPropsAxisName = {
+  'cp': ["Sediment Loss", "Retreat Rate"],
+  'cc': ["Slope", "Landcover", "Shore Type"],
+  'cm': ["Slope", "Landcover", "Shore Type", "Sediment Loss", "Retreat Rate"]
+  };
 
-  ctx.clearRect(0, 0, size, size);
-  ctx.save();
-  ctx.translate(size / 2, size / 2);
-
-  console.log(firstDropSim.value);
-  // --- extract feature data --- //
-  const f = e.layer.feature.properties;
-  const slope = f.CalSlope;
-  const landcover = f.CalLandcov;
-  const shoreType = f.CalShoreTy;
-  const sedimentNetLoss = f.CalSedi;
-  const retreatRate = f.CalRetreat;
-
-  // combine them into an array for radar chart
-  const combineArray = [slope, landcover, shoreType, sedimentNetLoss, retreatRate];
-
-  // define corresponding axis names
-  const axisNames = ["Slope", "Landcover", "Shore Type", "Sediment Loss", "Retreat Rate"];
-
-
-  // --- draw a test radar shape --- //
-  const MAX_SCALE = 4;
-  const n = combineArray.length;
-
-  // helper: convert to XY
-  const coords = [];
-  for (let i = 0; i < n; i++) {
-    const theta = (2 * Math.PI * i) / n - Math.PI / 2;
-    coords.push([
-      combineArray[i] * Math.cos(theta),
-      combineArray[i] * Math.sin(theta)
-    ]);
+  const modelPropSelect = {
+    // 'cp': combineModelPropToArray,
+    'cc': coastalConditionPropToArray,
+    'cm': combineModelPropToArray
   }
-  coords.push(coords[0]); // close shape
 
-  // --- scale to fit canvas --- //
-  const scale = (size / 2 - 40) / MAX_SCALE;
-  ctx.scale(scale, -scale);
+  const currentModel = firstDropSim.value;
 
-  // --- draw axes --- //
-  ctx.strokeStyle = "#ccc";
-  ctx.lineWidth = 0.02;
-  for (let i = 0; i < n; i++) {
-    const theta = (2 * Math.PI * i) / n - Math.PI / 2;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(MAX_SCALE * Math.cos(theta), MAX_SCALE * Math.sin(theta));
-    ctx.stroke();
+  if (currentModel == 'cp') {
+    canvas.style.display = 'none';
+  } else {
+    canvas.style.display = 'inline';
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const size = 300;
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
+    canvas.style.width = `${size}px`;
+    canvas.style.height = `${size}px`;
+    ctx.scale(dpr, dpr);
 
-    // draw axis label
-    const nameX = (MAX_SCALE + 0.3) * Math.cos(theta);
-    const nameY = (MAX_SCALE + 0.3) * Math.sin(theta);
+    ctx.clearRect(0, 0, size, size);
     ctx.save();
-    ctx.scale(1, -1);
-    ctx.fillStyle = "#000";
-    ctx.font = "0.035em Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(axisNames[i], nameX, -nameY);
+    ctx.translate(size / 2, size / 2);
+
+    // extract feature data
+    const f = e.layer.feature.properties;
+    modelPropSelect[currentModel](f);
+    const combineArray = modelPropSelect[currentModel](f);
+
+    // define corresponding axis names
+    const axisNames = modelPropsAxisName[currentModel];
+
+    // draw a test radar shape
+    const MAX_SCALE = 4;
+    const n = combineArray.length;
+
+    // helper: convert to XY
+    const coords = [];
+    for (let i = 0; i < n; i++) {
+      const theta = (2 * Math.PI * i) / n - Math.PI / 2;
+      coords.push([
+        combineArray[i] * Math.cos(theta),
+        combineArray[i] * Math.sin(theta)
+      ]);
+    }
+    coords.push(coords[0]); // close shape
+
+    //  scale to fit canvas
+    const scale = (size / 2 - 40) / MAX_SCALE;
+    ctx.scale(scale, -scale);
+
+    //  draw axes
+    ctx.strokeStyle = "#ccc";
+    ctx.lineWidth = 0.02;
+    for (let i = 0; i < n; i++) {
+      const theta = (2 * Math.PI * i) / n - Math.PI / 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(MAX_SCALE * Math.cos(theta), MAX_SCALE * Math.sin(theta));
+      ctx.stroke();
+
+      // draw axis label
+      const nameX = (MAX_SCALE + 0.3) * Math.cos(theta);
+      const nameY = (MAX_SCALE + 0.3) * Math.sin(theta);
+      ctx.save();
+      ctx.scale(1, -1);
+      ctx.fillStyle = "#000";
+      ctx.font = "0.035em Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(axisNames[i], nameX, -nameY);
+      ctx.restore();
+    }
+
+    // from pointScore
+    const psFeature = pointScore[0].properties; // example: first point
+    const combineArray2 = modelPropSelect[currentModel](psFeature);
+
+    const coords2 = [];
+    for (let i = 0; i < combineArray2.length; i++) {
+      const theta = (2 * Math.PI * i) / combineArray2.length - Math.PI / 2;
+      coords2.push([
+        combineArray2[i] * Math.cos(theta),
+        combineArray2[i] * Math.sin(theta)
+      ]);
+    }
+    coords2.push(coords2[0]);
+
+    // draw polygon
+    drawPolygon(ctx, coords, "#0077ff", true, 0.25);
+    drawPolygon(ctx, coords2, "#ff6600", true, 0.25);
+
     ctx.restore();
   }
-
-  // --- 2️⃣ Second polygon: from pointScore --- //
-  // assume pointScore is globally accessible or you can pass it in
-  const psFeature = pointScore[0]; // example: first point
-  const slope2 = psFeature.properties.CalSlope;
-  const landcover2 = psFeature.properties.CalLandcov;
-  const shoreType2 = psFeature.properties.CalShoreTy;
-  const sedimentNetLoss2 = psFeature.properties.CalSedi;
-  const retreatRate2 = psFeature.properties.CalRetreat;
-
-  const combineArray2 = [slope2, landcover2, shoreType2, sedimentNetLoss2, retreatRate2];
-
-  const coords2 = [];
-  for (let i = 0; i < combineArray2.length; i++) {
-    const theta = (2 * Math.PI * i) / combineArray2.length - Math.PI / 2;
-    coords2.push([
-      combineArray2[i] * Math.cos(theta),
-      combineArray2[i] * Math.sin(theta)
-    ]);
-  }
-  coords2.push(coords2[0]);
-
-  // --- draw first polygon --- //
-  ctx.beginPath();
-  ctx.moveTo(coords[0][0], coords[0][1]);
-  for (let i = 1; i < coords.length; i++) {
-    ctx.lineTo(coords[i][0], coords[i][1]);
-  }
-  ctx.closePath();
-  ctx.strokeStyle = "#0077ff";
-  ctx.lineWidth = 0.05;
-  ctx.stroke();
-  ctx.fillStyle = "rgba(0, 119, 255, 0.25)";
-  ctx.fill();
-
-  // draw second polygon
-  ctx.beginPath();
-  ctx.moveTo(coords2[0][0], coords2[0][1]);
-  for (let i = 1; i < coords2.length; i++) ctx.lineTo(coords2[i][0], coords2[i][1]);
-  ctx.closePath();
-  ctx.strokeStyle = "#ff6600";
-  ctx.lineWidth = 0.05;
-  ctx.stroke();
-  ctx.fillStyle = "rgba(255, 102, 0, 0.25)";
-  ctx.fill();
-
-  ctx.restore();
 });
 
   map.colorLayer.bringToFront();
@@ -594,9 +550,7 @@ function returnToStartSim(map, coastLine) {
   showModelButton.disabled = true;
   finishShowModel.disabled = true;
   firstDropSim.value = '';
-  // clear dynamic dropdown
-  // clearDynamicDropdown('#second-priority-sim');
-  // clearDynamicDropdown('#third-priority-sim');
+
   for (const i of dropdownAllSim) {
     i.disabled = true;
   }
@@ -633,6 +587,24 @@ function findClosestData(whichData, coastline) {
 
   const prop = [dataNear];
   return prop;
+}
+
+// Draw polygon
+function drawPolygon(ctx, coords, color, fill=false, alpha=0.25) {
+  if (!coords || coords.length === 0) return;
+  ctx.beginPath();
+  ctx.moveTo(coords[0][0], coords[0][1]);
+  for (let i = 1; i < coords.length; i++) ctx.lineTo(coords[i][0], coords[i][1]);
+  ctx.closePath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2 / 40;
+  ctx.stroke();
+  if (fill) {
+    ctx.fillStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+  }
 }
 
 export {

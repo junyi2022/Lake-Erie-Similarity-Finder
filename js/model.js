@@ -54,12 +54,7 @@ function coastalProcessSim(resolutionCollection, pointScore) {
 }
 
 function coastalConditionSim(resolutionCollection, pointScore) {
-  // selected point's values
-  const pointSlope = pointScore[0].properties.CalSlope;
-  const pointLandcover = pointScore[0].properties.CalLandcover;
-  const pointShoreType = pointScore[0].properties.CalShoreType;
-  const pointCombineArray = [pointSlope, pointLandcover, pointShoreType];
-  const pointPolygon = convertToXY(pointCombineArray); // array of array of coordinates
+  const pointPolygon = pointScore[0].properties.polygonCoords;
   for (let i = 0; i < resolutionCollection.features.length; i++) {
     const thisPolygon = resolutionCollection.features[i].properties.polygonCoords;
     
@@ -93,8 +88,31 @@ function combinedModelSim(resolutionCollection, pointScore) {
   }
 }
 
+// canvas component calculations
+
+function coastalConditionPropToArray(f) {
+  const slope = f.CalSlope;
+  const landcover = f.CalLandcover;
+  const shoreType = f.CalShoreType;
+
+  // combine them into an array for radar chart
+  return [slope, landcover, shoreType];
+}``
+
+function combineModelPropToArray(f) {
+  const slope = f.CalSlope;
+  const landcover = f.CalLandcov;
+  const shoreType = f.CalShoreTy;
+  const sedimentNetLoss = f.CalSedi;
+  const retreatRate = f.CalRetreat;
+
+  // combine them into an array for radar chart
+  return [slope, landcover, shoreType, sedimentNetLoss, retreatRate];
+}
+
 
 // supporting functions
+
 // Convert radius array to Cartesian coordinates
 function convertToXY(radii) {
   const n = radii.length;
@@ -148,5 +166,7 @@ export {
   coastalConditionCal,
   coastalConditionSim,
   combinedModelCal,
-  combinedModelSim
+  combinedModelSim,
+  coastalConditionPropToArray,
+  combineModelPropToArray
 };

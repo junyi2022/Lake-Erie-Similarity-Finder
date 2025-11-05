@@ -149,6 +149,5 @@ export {
   withSpinnerDo,
   getParsed,
   fillSlider,
-  updatePercentageDisplay,
   displaySelectPointScoreOnRange,
 };
