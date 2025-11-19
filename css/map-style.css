@@ -89,3 +89,15 @@ section.leaflet-control-layers-list:before {
     height: 300px;
     border: 1px solid #ccc;
 }
+
+.popup-legend {
+    list-style: none;
+    padding: 0;
+}
+
+.diagram-legend {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+}

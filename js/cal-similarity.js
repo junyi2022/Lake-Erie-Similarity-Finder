@@ -313,6 +313,16 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
             <p class="unit-first-priority">Similarity percentage of <em>${firstPropName}</em> to chosen point is <strong>${(l.feature.properties.similarity * 100).toFixed(1)}</strong> %</p>
             <p class="unit-finalscore">Absolute Value: ${(l.feature.properties[propNeed]).toFixed(4)}</p>
             <canvas class="canvas" id="${canvasId}"></canvas>
+            <ul class="popup-legend">
+              <li class="diagram-legend">
+                <span class="circle-color" style="background-color: #0077ff; width: 6px; height: 6px; border-radius: 3px; margin-left: 8px; margin-right: 8px"></span>
+                <span class="lead-label">This area's diagram</span>
+              </li>
+              <li class="diagram-legend">
+                <span class="circle-color" style="background-color: #ff6600; width: 6px; height: 6px; border-radius: 3px; margin-left: 7px; margin-right: 7px"></span>
+                <span class="lead-label">Selected point's diagram</span>
+              </li>
+              </ul>
     `;
   }).addTo(map);
 
