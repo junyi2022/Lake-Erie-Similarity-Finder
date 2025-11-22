@@ -316,11 +316,11 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
             <ul class="popup-legend">
               <li class="diagram-legend">
                 <span class="circle-color" style="background-color: #0077ff; width: 6px; height: 6px; border-radius: 3px; margin-left: 8px; margin-right: 8px"></span>
-                <span class="lead-label">This area's diagram</span>
+                <span class="lead-label">This area's values</span>
               </li>
               <li class="diagram-legend">
                 <span class="circle-color" style="background-color: #ff6600; width: 6px; height: 6px; border-radius: 3px; margin-left: 7px; margin-right: 7px"></span>
-                <span class="lead-label">Selected point's diagram</span>
+                <span class="lead-label">Selected point's values</span>
               </li>
               </ul>
     `;
@@ -346,6 +346,7 @@ map.finalSimLayer.on("popupopen", (e) => {
 
   if (currentModel == 'cp') {
     canvas.style.display = 'none';
+    
   } else {
     canvas.style.display = 'inline';
     const ctx = canvas.getContext("2d");
@@ -363,7 +364,6 @@ map.finalSimLayer.on("popupopen", (e) => {
 
     // extract feature data
     const f = e.layer.feature.properties;
-    modelPropSelect[currentModel](f);
     const combineArray = modelPropSelect[currentModel](f);
 
     // define corresponding axis names
@@ -389,7 +389,7 @@ map.finalSimLayer.on("popupopen", (e) => {
     ctx.scale(scale, -scale);
 
     //  draw axes
-    ctx.strokeStyle = "#ccc";
+    ctx.strokeStyle = "#bbbbbbff";
     ctx.lineWidth = 0.02;
     for (let i = 0; i < n; i++) {
       const theta = (2 * Math.PI * i) / n - Math.PI / 2;
@@ -397,6 +397,43 @@ map.finalSimLayer.on("popupopen", (e) => {
       ctx.moveTo(0, 0);
       ctx.lineTo(MAX_SCALE * Math.cos(theta), MAX_SCALE * Math.sin(theta));
       ctx.stroke();
+
+      // Add ticks along the axis
+      const tickCount = 4; // Number of ticks (including the outer one)
+      for (let j = 1; j <= tickCount; j++) {
+        const tickValue = (MAX_SCALE * j) / tickCount;
+        const tickX = tickValue * Math.cos(theta);
+        const tickY = tickValue * Math.sin(theta);
+        
+        // Calculate perpendicular direction for tick marks
+        const tickLength = 0.1; // Length of tick marks
+        const perpX = tickLength * Math.cos(theta + Math.PI / 2);
+        const perpY = tickLength * Math.sin(theta + Math.PI / 2);
+        
+        // Draw tick mark
+        ctx.beginPath();
+        ctx.moveTo(tickX - perpX, tickY - perpY);
+        ctx.lineTo(tickX + perpX, tickY + perpY);
+        ctx.stroke();
+
+        // // Optional: Add tick labels (numbers)
+        // if (j < tickCount) { // Skip label at the very end to avoid clutter
+        //   ctx.save();
+        //   ctx.scale(1, -1);
+        //   ctx.fillStyle = "#666";
+        //   ctx.font = "0.025em Arial";
+        //   ctx.textAlign = "center";
+        //   ctx.textBaseline = "middle";
+          
+        //   // Position label slightly away from tick
+        //   const labelOffset = 0.15;
+        //   const labelX = (tickValue + labelOffset) * Math.cos(theta);
+        //   const labelY = (tickValue + labelOffset) * Math.sin(theta);
+          
+        //   ctx.fillText(j.toString(), labelX, -labelY);
+        //   ctx.restore();
+        // }
+      }
 
       // draw axis label
       const nameX = (MAX_SCALE + 0.3) * Math.cos(theta);
