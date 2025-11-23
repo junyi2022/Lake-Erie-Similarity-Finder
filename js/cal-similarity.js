@@ -2,7 +2,7 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 
 import { legend1Style, legend3Style } from './map.js';
-import {coastalProcessCal, coastalProcessSim, coastalConditionCal, coastalConditionSim, combinedModelCal, combinedModelSim, combineModelPropToArray, coastalConditionPropToArray } from './model.js';
+import {coastalProcessCal, coastalProcessSim, coastalConditionCal, coastalConditionSim, combinedModelCal, combinedModelSim, combineModelPropToArray, coastalConditionPropToArray, coastalProcessPropToArray } from './model.js';
 import { withSpinnerDo, displaySelectPointScoreOnRange, getParsed, fillSlider } from './logistics.js';
 import { modelName, colorScale, unitColorScale, getMinMaxFromFeatureArray, handleDownload } from './cal.js';
 import { initializePoints, handleMarkerSnap } from './cal.js';
@@ -313,6 +313,22 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
             <p class="unit-first-priority">Similarity percentage of <em>${firstPropName}</em> to chosen point is <strong>${(l.feature.properties.similarity * 100).toFixed(1)}</strong> %</p>
             <p class="unit-finalscore">Absolute Value: ${(l.feature.properties[propNeed]).toFixed(4)}</p>
             <canvas class="canvas" id="${canvasId}"></canvas>
+            <div class="bar-chart-popup">
+              <div class="bar-chart-label-wrapper">
+                <p class="bar-chart-label">Sediment net loss</p>
+                <p class="bar-chart-label">Retreat rate</p>
+              </div>
+              <div class="chart-container">
+                <div class="center-line"></div>
+                <div class="bar bar-left" id="selectLeftBar"></div>
+                <div class="bar bar-right" id="selectRightBar"></div>
+              </div>
+              <div class="chart-container">
+                <div class="center-line"></div>
+                <div class="bar bar-left" id="pointLeftBar"></div>
+                <div class="bar bar-right" id="pointRightBar"></div>
+              </div>
+            </div>
             <ul class="popup-legend">
               <li class="diagram-legend">
                 <span class="circle-color" style="background-color: #0077ff; width: 6px; height: 6px; border-radius: 3px; margin-left: 8px; margin-right: 8px"></span>
@@ -328,6 +344,7 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
 
 map.finalSimLayer.on("popupopen", (e) => {
   const canvas = e.popup._contentNode.querySelector(".canvas");
+  const barChart = e.popup._contentNode.querySelector(".chart-container");
   if (!canvas) return;
 
   const modelPropsAxisName = {
@@ -337,7 +354,7 @@ map.finalSimLayer.on("popupopen", (e) => {
   };
 
   const modelPropSelect = {
-    // 'cp': combineModelPropToArray,
+    'cp': coastalProcessPropToArray,
     'cc': coastalConditionPropToArray,
     'cm': combineModelPropToArray
   }
@@ -346,9 +363,22 @@ map.finalSimLayer.on("popupopen", (e) => {
 
   if (currentModel == 'cp') {
     canvas.style.display = 'none';
+    barChart.style.display = 'inline';
+
+    // extract feature data
+    const f = e.layer.feature.properties;
+    const combineArray = modelPropSelect[currentModel](f);
+
+    // from pointScore
+    const psFeature = pointScore[0].properties; // example: first point
+    const combineArray2 = modelPropSelect[currentModel](psFeature);
+    
+    calBarChart(combineArray, "selectLeftBar", "selectRightBar");
+    calBarChart(combineArray2, "pointLeftBar", "pointRightBar");
     
   } else {
     canvas.style.display = 'inline';
+    barChart.style.display = 'none';
     const ctx = canvas.getContext("2d");
     const dpr = window.devicePixelRatio || 1;
     const size = 300;
@@ -652,6 +682,26 @@ function drawPolygon(ctx, coords, color, fill=false, alpha=0.25) {
     ctx.fill();
     ctx.globalAlpha = 1.0;
   }
+}
+
+function calBarChart(array, leftClass, rightClass) {
+  // Calculate bar widths (normalize to percentage)
+  const leftValue = array[0];
+  const rightValue = array[1];
+  const leftPercentage = leftValue * 50/3;
+  const rightPercentage = rightValue * 50/3;
+  
+  // Update bars
+  const leftBar = document.getElementById(leftClass);
+  const rightBar = document.getElementById(rightClass);
+  
+  leftBar.style.width = `${leftPercentage}%`;
+  leftBar.style.left = `${50 - leftPercentage}%`;
+  leftBar.textContent = leftValue;
+  
+  rightBar.style.width = `${rightPercentage}%`;
+  rightBar.style.left = '50%';
+  rightBar.textContent = rightValue;
 }
 
 export {

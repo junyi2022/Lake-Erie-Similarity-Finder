@@ -90,6 +90,13 @@ function combinedModelSim(resolutionCollection, pointScore) {
 
 // canvas component calculations
 
+function coastalProcessPropToArray(f) {
+  const sedimentNetLoss = f.CalSedi;
+  const retreatRate = f.CalRetreat;
+
+  return [sedimentNetLoss, retreatRate];
+}
+
 function coastalConditionPropToArray(f) {
   const slope = f.CalSlope;
   const landcover = f.CalLandcover;
@@ -97,7 +104,7 @@ function coastalConditionPropToArray(f) {
 
   // combine them into an array for radar chart
   return [slope, landcover, shoreType];
-}``
+}
 
 function combineModelPropToArray(f) {
   const slope = f.CalSlope;
@@ -167,6 +174,7 @@ export {
   coastalConditionSim,
   combinedModelCal,
   combinedModelSim,
+  coastalProcessPropToArray,
   coastalConditionPropToArray,
   combineModelPropToArray
 };
