@@ -344,7 +344,7 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
 
 map.finalSimLayer.on("popupopen", (e) => {
   const canvas = e.popup._contentNode.querySelector(".canvas");
-  const barChart = e.popup._contentNode.querySelector(".chart-container");
+  const barChart = e.popup._contentNode.querySelector(".bar-chart-popup");
   if (!canvas) return;
 
   const modelPropsAxisName = {
