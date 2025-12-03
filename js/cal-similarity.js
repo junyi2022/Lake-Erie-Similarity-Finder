@@ -313,20 +313,22 @@ function handleGroupResSim(map, resolutionCollection, firstDropSim, pointScore, 
             <p class="unit-first-priority">Similarity percentage of <em>${firstPropName}</em> to chosen point is <strong>${(l.feature.properties.similarity * 100).toFixed(1)}</strong> %</p>
             <p class="unit-finalscore">Absolute Value: ${(l.feature.properties[propNeed]).toFixed(4)}</p>
             <canvas class="canvas" id="${canvasId}"></canvas>
-            <div class="bar-chart-popup">
+            <div class="bar-chart-popup-all">
               <div class="bar-chart-label-wrapper">
-                <p class="bar-chart-label">Sediment net loss</p>
-                <p class="bar-chart-label">Retreat rate</p>
+                <p id="bar-chart-label">Sediment net loss</p>
+                <p id="bar-chart-label">Retreat rate</p>
               </div>
-              <div class="chart-container">
-                <div class="center-line"></div>
-                <div class="bar bar-left" id="selectLeftBar"></div>
-                <div class="bar bar-right" id="selectRightBar"></div>
-              </div>
-              <div class="chart-container">
-                <div class="center-line"></div>
-                <div class="bar bar-left" id="pointLeftBar"></div>
-                <div class="bar bar-right" id="pointRightBar"></div>
+              <div class="bar-chart-popup">
+                <div class="chart-container">
+                  <div class="center-line"></div>
+                  <div class="bar bar-left" id="selectLeftBar"></div>
+                  <div class="bar bar-right" id="selectRightBar"></div>
+                </div>
+                <div class="chart-container">
+                  <div class="center-line"></div>
+                  <div class="bar bar-left" id="pointLeftBar"></div>
+                  <div class="bar bar-right" id="pointRightBar"></div>
+                </div>
               </div>
             </div>
             <ul class="popup-legend">
