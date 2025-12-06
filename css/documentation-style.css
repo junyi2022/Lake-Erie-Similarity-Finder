@@ -97,6 +97,25 @@ code {
     width: 200px;
 }
 
+/* radar diagram */
+
+.insert-table-group-radar {
+    width: 90%;
+    display:flex;
+    box-sizing: border-box;
+    flex-direction: column;
+    margin-right: 20px;
+}
+
+.insert-table-text-radar {
+    width: 100%;
+    padding-right: 20px;
+}
+
+.insert-table-img-radar {
+    width: 100%;
+}
+
 /* data explorer style */
 
 .de-data-title-group {
